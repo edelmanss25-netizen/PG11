@@ -497,6 +497,36 @@ body.dp-wide .catrow{grid-template-columns:104px repeat(3,minmax(0,1fr))}
   .tb-readout .readout{display:none}
 }
 @media (max-width:620px){.brand .tag{display:none}.stack{padding:16px 10px 60px}.btn .kbd{display:none}.dp-head{padding:9px 12px}.dp-body{padding:14px 12px 50px}}
+
+/* ===== ТЕЛЕФОН: шапка в несколько строк, без горизонтальной прокрутки, панели-шторки ===== */
+html{overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{max-width:100vw}
+@media (max-width:1150px){
+  body.rleft .scrim,body.rright .scrim{opacity:1;pointer-events:auto}
+  .rail.left,.rail.right{-webkit-overflow-scrolling:touch;padding-bottom:env(safe-area-inset-bottom)}
+}
+@media (max-width:900px){
+  .topbar{max-width:100vw}
+  .tb-row{flex-wrap:wrap;height:auto;padding:8px 10px;gap:8px}
+  .brand b{font-size:18px}
+  .brand .tag{display:none}
+  .tb-nav{margin-left:auto}
+  .tb-readout{flex:1 1 100%;margin-left:0;gap:6px;flex-wrap:wrap}
+  .tb-readout .btn,.tb-readout .iconbtn{flex:1 1 auto;justify-content:center;padding:8px 9px;font-size:11.5px;min-height:36px}
+  .tb-readout .saveind{display:none}
+  .btn .kbd{display:none}
+  .iconbtn{min-height:34px}
+  .stage-head{padding:8px 10px;gap:8px}
+  .zoomctl{margin-left:0;width:100%}
+  .zoomctl input[type=range]{flex:1;width:auto}
+  .tk{min-width:44px;padding:8px 8px 10px}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom))}
+}
+@media (max-width:620px){
+  #infoGrid,#infoSize{display:none}
+  .brand b{font-size:17px}
+  .tb-readout .btn,.tb-readout .iconbtn{font-size:11px;padding:8px 6px}
+}
 @media (prefers-reduced-motion:reduce){*{animation-duration:.001s!important;transition-duration:.001s!important}.frame{opacity:1;transform:none}}
 
 @media print{
@@ -1579,6 +1609,7 @@ function fitZoom(){
   const headH=$('.stage-head').offsetHeight||46;
   const vh=innerHeight-parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top'))-headH-56;
   const{pw,ph}=dims();
+  if(innerWidth<=900){setZoom(Math.min(Math.max(.3,($('#stack').clientWidth-20)/(pw*MMPX)),1.2));return}
   setZoom(Math.min(vw/(pw*MMPX),Math.max(.3,vh)/(ph*MMPX),1.2));
 }
 
