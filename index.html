@@ -243,7 +243,7 @@ input::placeholder{color:var(--tx-dim)}
 .rl{flex:1 1 0;min-height:2.1mm;border-bottom:.35pt solid var(--rule)}
 .evlist{position:relative;z-index:1;display:flex;flex-direction:column;gap:.5mm;flex:0 0 auto}
 .ev{display:flex;align-items:flex-start;gap:1mm;font-size:var(--evfs,6.3pt);line-height:1.25;color:#1C2026;word-break:break-word}
-.ev .cb{flex:none;width:2.5mm;height:2.5mm;border:.4pt solid var(--hair);margin-top:.2mm;position:relative}
+.ev .cb{flex:none;width:calc(var(--evfs,6.3pt)*1.1);height:calc(var(--evfs,6.3pt)*1.1);border:.4pt solid var(--hair);margin-top:.15mm;position:relative}
 .ev.done .cb{background:var(--hair)}
 .ev.done .cb::after{content:'';position:absolute;left:.55mm;top:.15mm;width:.9mm;height:1.5mm;border:solid #FAF8F3;border-width:0 .4pt .4pt 0;transform:rotate(42deg)}
 .ev .tm{flex:none;font-family:'IBM Plex Mono';font-size:.86em;letter-spacing:.01em;color:#3E434B;line-height:1.42}
@@ -636,6 +636,7 @@ body{max-width:100vw}
           <label class="sw"><input type="checkbox" data-chk="markToday"><span class="track"></span>Сегодня</label>
           <label class="sw"><input type="checkbox" data-chk="outDays"><span class="track"></span>Соседи мес.</label>
           <label class="sw"><input type="checkbox" data-chk="printEvents"><span class="track"></span>Печатать встречи</label>
+          <label class="sw" title="Занятые дни получают больше места, а текст при нехватке чуть уменьшается. Выключите, чтобы показывать 2–3 встречи и «+ ещё»."><input type="checkbox" data-chk="showAll"><span class="track"></span>Все встречи в клетках</label>
         </div>
         <p class="hint">Плотность меняет кегль номера дня, кегль встреч и отступ ячейки. Клик по дню открывает панель «План дня» справа.</p>
       </div></div></div>
@@ -860,7 +861,7 @@ function rollQuote(){
 /* ---------- состояние ---------- */
 const DEF={year:TODAY.getFullYear(),month:TODAY.getMonth(),scope:'month',startMon:true,
   orient:'portrait',margin:12,density:'std',copies:1,ink:'color',
-  cellType:'lines',lines:2,weekends:true,holidays:true,weeks:false,markToday:true,outDays:true,printEvents:true,
+  cellType:'lines',lines:2,weekends:true,holidays:true,weeks:false,markToday:true,outDays:true,printEvents:true,showAll:true,
   miniYear:true,goals:true,habits:false,notesArea:true,finance:false,legend:true,
   owner:'',colophon:'',crop:false,folio:true,mfs:32};
 const LS={s:'format.sheet.v3',e:'format.events.v3',u:'format.ui.v2',d:'format.dayplan.v3'};
@@ -1115,21 +1116,73 @@ function guardSheet(sheet){
   const dn=DENS[state.density];
   const minMm=Math.max(9,Math.min(dn.minrow,perPx/MMPX));
   sheet.style.setProperty('--minrow',minMm.toFixed(2)+'mm');
+  if(state.showAll!==false)distributeWeeks(sheet);
+  else sheet.querySelectorAll('.week').forEach(w=>{w.style.flexGrow='';w.style.minHeight=''});
   sheet.querySelectorAll('.cell:not([data-out="1"])').forEach(fitCell);
 }
 function guardAll(){$$('.sheet').forEach(guardSheet)}
+const FS_STEPS=[1,.93,.86,.8,.74];
+/* высота, нужная клетке, чтобы показать все её встречи при кегле k (без писчих строк) */
+function cellNeed(cell,k){
+  const body=cell.querySelector('.cbody'),list=body&&body.querySelector('.evlist');
+  if(!list)return 0;
+  const evs=list.querySelectorAll('.ev:not(.more)');if(!evs.length)return 0;
+  evs.forEach(e=>e.style.display='');
+  const m=list.querySelector('.ev.more');if(m)m.remove();
+  if(k<1)cell.style.setProperty('--evfs',(DENS[state.density].evfs*k).toFixed(2)+'pt');else cell.style.removeProperty('--evfs');
+  const padTop=parseFloat(getComputedStyle(body).paddingTop)||0;
+  return cell.clientHeight-body.clientHeight+padTop+list.offsetHeight+2;
+}
+/* занятые недели забирают высоту у пустых: каждая неделя получает минимум, нужный её встречам,
+   остальное делится «по уровню воды». Если даже при меньшем кегле тесно — делим пропорционально */
+function distributeWeeks(sheet){
+  const calb=sheet.querySelector('.calb');if(!calb)return;
+  const weeks=[...calb.querySelectorAll('.week')];if(!weeks.length)return;
+  weeks.forEach(w=>{w.style.flexGrow='';w.style.minHeight=''});
+  const total=calb.clientHeight;if(!total)return;
+  const minrow=parseFloat(getComputedStyle(weeks[0]).minHeight)||0;
+  const floor=minrow*.62;                                           // ниже этого неделю не ужимаем
+  const eq=total/weeks.length;
+  let m,ok=false;
+  for(const k of FS_STEPS){
+    m=weeks.map(w=>{let n=0;w.querySelectorAll('.cell:not([data-out="1"])').forEach(c=>{n=Math.max(n,cellNeed(c,k))});return Math.max(floor,n)});
+    if(Math.max(...m)<=eq+1)return;                                 // при таком кегле всем хватает равных строк
+    if(m.reduce((x,y)=>x+y,0)<=total){ok=true;break}
+  }
+  let h;
+  if(ok){
+    let lo=0,hi=total;                                              // уровень L: Σ max(m_i, L) = total
+    for(let i=0;i<40;i++){const L=(lo+hi)/2;const sum=m.reduce((x,y)=>x+Math.max(y,L),0);if(sum>total)hi=L;else lo=L}
+    h=m.map(v=>Math.max(v,lo));
+  }else{const k=total/m.reduce((x,y)=>x+y,0);h=m.map(v=>v*k)}
+  weeks.forEach((w,i)=>{
+    w.style.flexGrow=h[i].toFixed(2);
+    if(h[i]<minrow)w.style.minHeight=Math.max(0,h[i]-1).toFixed(1)+'px';
+  });
+}
 function fitCell(cell){
   const body=cell.querySelector('.cbody');if(!body)return;
   const list=body.querySelector('.evlist');if(!list)return;
-  const iso=cell.dataset.iso, H=body.clientHeight;
+  const iso=cell.dataset.iso;
   cell.classList.remove('cut');
+  cell.style.removeProperty('--evfs');
   const oldMore=list.querySelector('.ev.more');if(oldMore)oldMore.remove();
   const evs=[...list.querySelectorAll('.ev')];
   evs.forEach(e=>e.style.display='');
   if(!evs.length){hidden[iso]=0;return}
+  const H=body.clientHeight-(parseFloat(getComputedStyle(body).paddingTop)||0);
   const gap=.5*MMPX;
   const reserve=state.cellType==='lines'?Math.min(H*.55,state.lines*LINE_PX+gap*state.lines):0;
-  const max=Math.max(LINE_PX,H-reserve);
+  let max=Math.max(LINE_PX,H-reserve);
+  if(state.showAll!==false){
+    if(list.offsetHeight<=max+.5){hidden[iso]=0;return}               // влезает вместе с писчими строками
+    const base=DENS[state.density].evfs;
+    for(const k of [1,.93,.86,.8,.74]){                                // без строк, затем чуть меньший кегль
+      if(k<1)cell.style.setProperty('--evfs',(base*k).toFixed(2)+'pt');
+      if(list.offsetHeight<=H+.5){hidden[iso]=0;return}
+    }
+    max=Math.max(LINE_PX,H-LINE_PX);                                    // совсем густо: оставляем место под «+N ещё»
+  }
   let acc=0,shown=0;
   for(let i=0;i<evs.length;i++){const h=evs[i].offsetHeight+(i?gap:0);
     if(acc+h>max&&i>0){for(let j=i;j<evs.length;j++)evs[j].style.display='none';break}
@@ -1143,7 +1196,7 @@ function repaintCell(iso){
   const cell=$(`.cell[data-iso="${iso}"]`);if(!cell)return;
   const list=cell.querySelector('.evlist');if(!list)return;
   list.innerHTML=(state.printEvents?(events[iso]||[]):[]).map(evRowHTML).join('');
-  fitCell(cell);
+  const sh=cell.closest('.sheet');if(sh)guardSheet(sh);else fitCell(cell);
 }
 
 /* ---------- рендер листа ---------- */
