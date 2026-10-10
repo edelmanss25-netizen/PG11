@@ -498,6 +498,37 @@ body.dp-wide .catrow{grid-template-columns:104px repeat(3,minmax(0,1fr))}
 }
 @media (max-width:620px){.brand .tag{display:none}.stack{padding:16px 10px 60px}.btn .kbd{display:none}.dp-head{padding:9px 12px}.dp-body{padding:14px 12px 50px}}
 
+
+/* ===== РЕЖИМ «ЭКРАН»: лист растёт под встречи ===== */
+body.screenmode .po{display:none!important}
+body.screenmode #infoSize{display:none}
+@media (max-width:900px){body.screenmode #printBtn{display:none}}
+.sheet.scr{height:auto;min-height:0;overflow:visible;padding:3.2mm 0 3mm}
+.sheet.scr::after{display:none}
+.sheet.scr .pad{flex:none}
+.sheet.scr .cal{flex:none;overflow:visible}
+.sheet.scr .calb{flex:none}
+.sheet.scr .week{flex:none}
+.sheet.scr .cell{min-height:var(--minrow)}
+.sheet.scr .cbody{flex:0 0 auto;min-height:0;overflow:visible}
+.sheet.scr .cn,.sheet.scr .zone{display:none}
+.sheet.scr .ev.more{display:none}
+.sheet.scr .hol{font-size:5.4pt;max-height:none}
+.sheet.scr .calh span{font-size:6.6pt}
+.sheet.scr .blocks{margin-top:3mm}
+.sheet.nar .my{display:none}
+.sheet.nar .shead{gap:2mm}
+.sheet.nar .kick{font-size:5pt;letter-spacing:.12em}
+.sheet.nar .blocks{grid-template-columns:1fr}
+.sheet.nar .ev{flex-wrap:wrap;column-gap:.7mm;row-gap:0;margin-bottom:1mm;font-size:calc(var(--evfs)*.84);hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+.sheet.nar .ev .cb{display:none}
+.sheet.nar .ev .tm{font-size:.84em}
+.sheet.nar .cell{padding:.8mm .5mm .6mm .8mm}
+.sheet.nar .ev .evt{flex:1 0 100%}
+.sheet.nar .calh span{letter-spacing:.04em;font-size:6pt}
+.sheet.nar .dnum{font-size:calc(var(--dns)*.95)}
+.sheet.nar .sfoot{flex-direction:column;align-items:flex-start;gap:1mm}
+
 /* ===== ТЕЛЕФОН: шапка в несколько строк, без горизонтальной прокрутки, панели-шторки ===== */
 html{overflow-x:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{max-width:100vw}
@@ -608,10 +639,11 @@ body{max-width:100vw}
     <div class="sec" data-open="true">
       <button class="sec-h" type="button" aria-expanded="true"><span class="idx">01</span>Лист<span class="chev">▾</span></button>
       <div class="sec-b"><div class="wrap"><div class="sec-in">
-        <div class="row"><span class="cap">Формат</span><div class="seg" data-key="orient" role="group" aria-label="Ориентация"><button type="button" data-val="portrait">А4 портрет</button><button type="button" data-val="landscape">А4 альбом</button></div></div>
-        <div class="row"><span class="cap">Поля <b id="vMargin">12 мм</b></span><input type="range" min="6" max="20" step="1" data-num="margin" aria-label="Поля, мм"><div class="ticks"><span>6</span><span>13</span><span>20</span></div></div>
+        <div class="row"><span class="cap">Вид</span><div class="seg" id="modeSeg" role="group" aria-label="Вид листа"><button type="button" data-mode="screen">Экран</button><button type="button" data-mode="print">Печать А4</button></div><p class="hint" style="margin:6px 0 0">«Экран» — клетки растут и показывают все встречи. «Печать А4» — фиксированный лист для принтера.</p></div>
+        <div class="row po"><span class="cap">Формат</span><div class="seg" data-key="orient" role="group" aria-label="Ориентация"><button type="button" data-val="portrait">А4 портрет</button><button type="button" data-val="landscape">А4 альбом</button></div></div>
+        <div class="row po"><span class="cap">Поля <b id="vMargin">12 мм</b></span><input type="range" min="6" max="20" step="1" data-num="margin" aria-label="Поля, мм"><div class="ticks"><span>6</span><span>13</span><span>20</span></div></div>
         <div class="row"><span class="cap">Плотность</span><div class="seg" data-key="density" role="group" aria-label="Плотность"><button type="button" data-val="compact">Компакт</button><button type="button" data-val="std">Стандарт</button><button type="button" data-val="air">Простор</button></div></div>
-        <div class="row"><span class="cap">Копий месяца <b id="vCopies">1</b></span><input type="range" min="1" max="4" step="1" data-num="copies" aria-label="Количество копий"><div class="ticks"><span>1</span><span>2</span><span>4</span></div></div>
+        <div class="row po"><span class="cap">Копий месяца <b id="vCopies">1</b></span><input type="range" min="1" max="4" step="1" data-num="copies" aria-label="Количество копий"><div class="ticks"><span>1</span><span>2</span><span>4</span></div></div>
         <div class="row"><span class="cap">Краска</span><div class="seg" data-key="ink" role="group" aria-label="Краска"><button type="button" data-val="color">Цвет</button><button type="button" data-val="thin">Тонко</button><button type="button" data-val="mono">Ч/Б</button></div></div>
       </div></div></div>
     </div>
@@ -635,8 +667,8 @@ body{max-width:100vw}
           <label class="sw"><input type="checkbox" data-chk="weeks"><span class="track"></span>№ недель</label>
           <label class="sw"><input type="checkbox" data-chk="markToday"><span class="track"></span>Сегодня</label>
           <label class="sw"><input type="checkbox" data-chk="outDays"><span class="track"></span>Соседи мес.</label>
-          <label class="sw"><input type="checkbox" data-chk="printEvents"><span class="track"></span>Печатать встречи</label>
-          <label class="sw" title="Занятые дни получают больше места, а текст при нехватке чуть уменьшается. Выключите, чтобы показывать 2–3 встречи и «+ ещё»."><input type="checkbox" data-chk="showAll"><span class="track"></span>Все встречи в клетках</label>
+          <label class="sw po"><input type="checkbox" data-chk="printEvents"><span class="track"></span>Печатать встречи</label>
+          <label class="sw po" title="Занятые дни получают больше места, а текст при нехватке чуть уменьшается. Выключите, чтобы показывать 2–3 встречи и «+ ещё»."><input type="checkbox" data-chk="showAll"><span class="track"></span>Все встречи в клетках</label>
         </div>
         <p class="hint">Плотность меняет кегль номера дня, кегль встреч и отступ ячейки. Клик по дню открывает панель «План дня» справа.</p>
       </div></div></div>
@@ -661,7 +693,7 @@ body{max-width:100vw}
         </div>
       </div></div></div>
     </div>
-    <div class="sec" data-open="false">
+    <div class="sec po" data-open="false">
       <button class="sec-h" type="button" aria-expanded="false"><span class="idx">05</span>Печатные службы<span class="chev">▾</span></button>
       <div class="sec-b"><div class="wrap"><div class="sec-in">
         <div class="grid2">
@@ -683,7 +715,7 @@ body{max-width:100vw}
       <span class="pill"><i></i><span id="infoFormat">А4</span></span>
       <span class="pill" id="infoGrid">—</span>
       <span class="pill" id="infoSize">—</span>
-      <span class="warnbadge" id="warn">не влезает на лист <button id="fixBtn" type="button">подогнать</button></span>
+      <span class="warnbadge po" id="warn">не влезает на лист <button id="fixBtn" type="button">подогнать</button></span>
       <div class="zoomctl">
         <button class="iconbtn" id="fitBtn" type="button" title="Весь лист в окне">⤢</button>
         <button class="iconbtn" id="realBtn" type="button" title="Масштаб 100%">1:1</button>
@@ -698,7 +730,7 @@ body{max-width:100vw}
     <div class="rail-handle" data-side="right"><button type="button" title="Развернуть встречи и печать" aria-label="Развернуть встречи и печать"><span class="ar">◄</span><span class="vt">Встречи</span></button></div>
     <div class="tabs" role="tablist">
       <button class="on" data-tab="day" role="tab" type="button">Встречи</button>
-      <button data-tab="print" role="tab" type="button">Печать</button>
+      <button class="po" data-tab="print" role="tab" type="button">Печать</button>
     </div>
     <div class="tabpage on" data-page="day">
       <div>
@@ -1024,7 +1056,15 @@ const DENS={
   std:{minrow:18,sp:4.4,dns:9.5,evfs:6.3,cp:'1mm 1.2mm .8mm'},
   air:{minrow:23,sp:6,dns:11.5,evfs:6.9,cp:'1.3mm 1.5mm 1mm'}
 };
-function dims(){const m=state.margin,P=state.orient==='portrait';return{pw:(P?210:297)-2*m,ph:(P?297:210)-2*m-.4,P};}
+/* Режим «Экран»: лист не ограничен размером А4, клетки растут под встречи. Режим «Печать»: фиксированный А4. */
+const isScreen=()=>uip.mode!=='print';
+let _lastW=0;
+function stackW(){const s=$('#stack'),cs=getComputedStyle(s);return Math.max(280,s.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight)-1)}
+function dims(){
+  if(isScreen()){const W=stackW();_lastW=W;return{pw:W/(MMPX*ui.zoom),ph:0,P:true,screen:true}}
+  const m=state.margin,P=state.orient==='portrait';return{pw:(P?210:297)-2*m,ph:(P?297:210)-2*m-.4,P};
+}
+const screenZoom=()=>innerWidth<=900?1:1.12;
 const cols=()=>7+(state.weeks?1:0);
 function matrix(y,m){const dim=DAYS_IN(y,m);let shift=(new Date(y,m,1).getDay()+6)%7;if(!state.startMon)shift=(shift+1)%7;
   const cells=[];for(let i=0;i<shift;i++){const dt=new Date(y,m,-(shift-1-i));cells.push({out:true,date:dt});}
@@ -1086,8 +1126,9 @@ function sheetHTML(y,m,idx,total){
   const crop=state.crop?`<div class="crop tl"><b class="h"></b><b class="v"></b></div><div class="crop tr"><b class="h"></b><b class="v"></b></div><div class="crop bl"><b class="h"></b><b class="v"></b></div><div class="crop br"><b class="h"></b><b class="v"></b></div><div class="reg"></div>`:'';
   const showFoot=state.folio||state.colophon;
   const foot=showFoot?`<div class="sfoot"><span>${state.folio?`ФОРМАТ · ${P?'A4 портрет':'A4 альбом'} · поля ${state.margin} мм`:''}</span><span class="lg">${lg}</span><span>${state.folio?`${MONS[m]} ${y} · ${idx}/${total}`:''}</span></div>`:'';
-  return `<article class="sheet ${state.ink==='mono'?'mono':''} ${state.ink==='thin'?'thin':''}"
-    style="--sw:${pw}mm;--sh:${ph}mm;--pw:${pw}mm;--ph:${ph}mm;--m:${state.margin}mm;--sp:${dn.sp}mm;--cols:${C};--minrow:${dn.minrow}mm;--mfs:${state.mfs}pt;--dns:${dn.dns}pt;--evfs:${dn.evfs}pt;--cp:${dn.cp};--nh:${P?24:20}mm;--z:${ui.zoom}" data-y="${y}" data-m="${m}" data-rows="${mat.length}">
+  const SC=isScreen(),NAR=SC&&pw<150,fz=SC?1.3:1,mar=SC?(NAR?2.5:4):state.margin,mfs=SC&&NAR?Math.min(state.mfs,24):state.mfs;
+  return `<article class="sheet ${state.ink==='mono'?'mono':''} ${state.ink==='thin'?'thin':''} ${SC?'scr':''} ${NAR?'nar':''}"
+    style="--sw:${pw}mm;--sh:${ph}mm;--pw:${pw}mm;--ph:${ph}mm;--m:${mar}mm;--sp:${dn.sp}mm;--cols:${C};--minrow:${SC?(NAR?13:20):dn.minrow}mm;--mfs:${mfs}pt;--dns:${(dn.dns*(SC?1.15:1)).toFixed(2)}pt;--evfs:${(dn.evfs*fz).toFixed(2)}pt;--cp:${dn.cp};--nh:${P?24:20}mm;--z:${ui.zoom}" data-y="${y}" data-m="${m}" data-rows="${mat.length}">
     ${crop}<div class="pad">
       <header class="shead"><div>
         <p class="kick">${state.startMon?'Пн — Вс':'Вс — Сб'}${state.weeks?' · номера недель':''}${state.holidays?' · праздники РФ':''} · ${DAYS_IN(y,m)} дней</p>
@@ -1098,7 +1139,19 @@ function sheetHTML(y,m,idx,total){
       ${blocksHTML(y,m)}${foot}
     </div></article>`;
 }
+function showAllInSheet(sheet){
+  sheet.querySelectorAll('.cell').forEach(c=>{c.classList.remove('cut');
+    const l=c.querySelector('.evlist');if(!l)return;
+    l.querySelectorAll('.ev').forEach(e=>e.style.display='');const m=l.querySelector('.ev.more');if(m)m.remove();
+    if(c.dataset.iso)hidden[c.dataset.iso]=0});
+}
+function syncFrames(){
+  $$('.frame').forEach(f=>{const sh=f.querySelector('.sheet');if(!sh)return;
+    f.style.width=(dims().pw*MMPX*ui.zoom)+'px';
+    if(sh.classList.contains('scr'))f.style.height=(sh.offsetHeight*ui.zoom)+'px'});
+}
 function guardSheet(sheet){
+  if(sheet.classList.contains('scr')){showAllInSheet(sheet);syncFrames();return}
   const pad$=sheet.querySelector('.pad'); if(!pad$)return;
   const rows=+sheet.dataset.rows||5;
   const cs=getComputedStyle(pad$);
@@ -1161,6 +1214,7 @@ function distributeWeeks(sheet){
   });
 }
 function fitCell(cell){
+  if(isScreen()){const sh=cell.closest('.sheet');if(sh)showAllInSheet(sh);return}
   const body=cell.querySelector('.cbody');if(!body)return;
   const list=body.querySelector('.evlist');if(!list)return;
   const iso=cell.dataset.iso;
@@ -1205,7 +1259,7 @@ function render(){
   const{pw,ph}=dims(),list=monthsToRender(),total=list.length*state.copies;
   let html='',i=0;
   for(const[y,m]of list)for(let c=0;c<state.copies;c++){i++;
-    html+=`<div class="frame" style="width:${pw*MMPX*ui.zoom}px;height:${ph*MMPX*ui.zoom}px"><span class="tagpg">стр. ${i} / ${total}</span>${sheetHTML(y,m,i,total)}</div>`}
+    html+=`<div class="frame" style="width:${pw*MMPX*ui.zoom}px;height:${ph?ph*MMPX*ui.zoom:300}px"><span class="tagpg">стр. ${i} / ${total}</span>${sheetHTML(y,m,i,total)}</div>`}
   $('#stack').innerHTML=html;
   guardAll();
   observeFrames(); paintChrome(total); buildTicker();
@@ -1219,9 +1273,9 @@ function paintChrome(total){
   const{pw,ph,P}=dims();
   $('#roMonth').textContent=`${MON[state.month].toLowerCase()} ${state.year}`;
   $('#roPages').textContent=total+(total===1?' страница':total<5?' страницы':' страниц');
-  $('#infoFormat').textContent=`А4 · ${P?'портрет':'альбом'}`;
+  $('#infoFormat').textContent=isScreen()?'экран · всё влезает':`А4 · ${P?'портрет':'альбом'}`;
   $('#infoGrid').textContent=`${cols()} колонок · ${matrix(state.year,state.month).length} строк`;
-  $('#infoSize').textContent=`${pw.toFixed(0)} × ${ph.toFixed(0)} мм`;
+  $('#infoSize').textContent=isScreen()?'':`${pw.toFixed(0)} × ${ph.toFixed(0)} мм`;
   $('#vYear').textContent=state.year;
   $('#vScopeNote').textContent=state.scope==='year'?'12 листов':'';
   $$('#mchips button').forEach(b=>{b.classList.toggle('on',+b.dataset.v===state.month);b.disabled=state.scope==='year'});
@@ -1497,6 +1551,16 @@ let rafId=0,tId=0;
 function scheduleRender(){clearTimeout(tId);const heavy=monthsToRender().length*state.copies>2;
   if(heavy){tId=setTimeout(()=>{rafId=0;render()},180)}else if(!rafId)rafId=requestAnimationFrame(()=>{rafId=0;render()});}
 
+function applyMode(){
+  document.body.classList.toggle('screenmode',isScreen());
+  $$('#modeSeg button').forEach(b=>{const on=b.dataset.mode===(isScreen()?'screen':'print');b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});
+}
+function setMode(m){
+  if((m==='screen')===isScreen()){applyMode();return}
+  uip.mode=m;saveU();applyMode();
+  ui.fit=true;ui.zoom=isScreen()?screenZoom():.7;
+  render();
+}
 function applyUI(){
   document.body.classList.toggle('hl',uip.hl);
   document.body.classList.toggle('hr',uip.hr);
@@ -1592,6 +1656,7 @@ function bind(){
     n.forEach(k=>delete events[k]);saveE();ui.editIdx=null;render();if(uip.dpOpen)renderDayView();toast('Месяц очищен')};
   $('#zoom').addEventListener('input',e=>{ui.fit=false;setZoom(+e.target.value/100)});
   $('#fitBtn').onclick=()=>{ui.fit=true;fitZoom()};
+  $$('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
   $('#realBtn').onclick=()=>{ui.fit=false;setZoom(1);toast('Масштаб 1:1 · ширина листа 210 мм минус поля')};
   $('#fixBtn').onclick=autofix;
   $('#printBtn').onclick=doPrint;$('#printBtn2').onclick=doPrint;
@@ -1658,11 +1723,15 @@ function applyPreset(p){Object.assign(state,PRESETS[p]||PRESETS.base);selectDay(
 function switchTab(t){ui.tab=t;$$('.tabs button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));$$('.tabpage').forEach(p=>p.classList.toggle('on',p.dataset.page===t))}
 
 /* ---------- зум ---------- */
-function setZoom(z){ui.zoom=Math.min(1.5,Math.max(.3,z));const{pw,ph}=dims();
+let _zT=0;
+function setZoom(z){ui.zoom=Math.min(1.5,Math.max(.3,z));
+  if(isScreen()){const el=$('#zoom');el.value=Math.round(ui.zoom*100);setFill(el);$('#zoomVal').textContent=Math.round(ui.zoom*100)+'%';clearTimeout(_zT);_zT=setTimeout(render,120);return}
+  const{pw,ph}=dims();
   $$('.sheet').forEach(s=>s.style.setProperty('--z',ui.zoom));
   $$('.frame').forEach(f=>{f.style.width=(pw*MMPX*ui.zoom)+'px';f.style.height=(ph*MMPX*ui.zoom)+'px'});
   const el=$('#zoom');el.value=Math.round(ui.zoom*100);setFill(el);$('#zoomVal').textContent=Math.round(ui.zoom*100)+'%';}
 function fitZoom(){
+  if(isScreen()){const z=screenZoom();if(Math.abs(z-ui.zoom)>.001){ui.zoom=z;render();return}relayoutScreen();return}
   const vw=$('#stack').clientWidth-36;
   const headH=$('.stage-head').offsetHeight||46;
   const vh=innerHeight-parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--top'))-headH-56;
@@ -1673,7 +1742,9 @@ function fitZoom(){
 
 /* ---------- печать ---------- */
 function applyPageStyle(){const P=state.orient==='portrait';$('#pagestyle').textContent=`@page{size:A4 ${P?'portrait':'landscape'};margin:${state.margin}mm}`}
+let printBack=false;
 function doPrint(){
+  if(isScreen()){printBack=true;setMode('print');setTimeout(doPrint,350);return}
   if(uip.dpOpen){applyPageStyle();toast('Печатаем план дня · масштаб 100 %');setTimeout(()=>window.print(),120);return}
   applyPageStyle();guardAll();
   if(checkOverflow())toast('Часть блоков не влезает на лист — нажмите «подогнать»');
@@ -1681,7 +1752,7 @@ function doPrint(){
   toast(`Печатаем ${pages} стр. А4 · поля ${state.margin} мм · масштаб 100 % · фон прозрачный`);
   setTimeout(()=>window.print(),140)}
 addEventListener('beforeprint',()=>{applyPageStyle();if(!uip.dpOpen)guardAll()});
-addEventListener('afterprint',()=>toast('Готово.'));
+addEventListener('afterprint',()=>{toast('Готово.');if(printBack){printBack=false;setMode('screen')}});
 
 /* ---------- клавиши ---------- */
 function shiftMonth(dir){let m=state.month+dir,y=state.year;if(m<0){m=11;y--}if(m>11){m=0;y++}
@@ -1712,12 +1783,19 @@ addEventListener('keydown',e=>{
 /* ---------- служебное ---------- */
 function deb(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...a),ms)}}
 let tt;function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),4200)}
+function relayoutScreen(){
+  if(!isScreen())return;
+  if(Math.abs(Math.round(stackW())-_lastW)<3){syncFrames();return}
+  render();
+}
+new ResizeObserver(deb(relayoutScreen,150)).observe($('#stack'));
 let io;function observeFrames(){if(io)io.disconnect();io=new IntersectionObserver(es=>es.forEach(x=>{if(x.isIntersecting){x.target.classList.add('in');io.unobserve(x.target)}}),{rootMargin:'0px 0px -6% 0px'});$$('.frame').forEach(f=>io.observe(f))}
 function measureTop(){document.documentElement.style.setProperty('--top',$('.topbar').offsetHeight+'px')}
 new ResizeObserver(measureTop).observe($('.topbar'));
 addEventListener('resize',deb(()=>{measureTop();if(ui.fit)fitZoom();if(innerWidth>1150)document.body.classList.remove('rright');if(innerWidth>900)document.body.classList.remove('rleft')},160));
 
 (function init(){
+  applyMode();if(isScreen())ui.zoom=screenZoom();
   buildRuler();measureTop();applyUI();applyDp();bind();syncInputs();render();
   if(uip.dpOpen)renderDayView();
   const iso=isoOf(TODAY);
