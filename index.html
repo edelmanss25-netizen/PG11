@@ -499,6 +499,40 @@ body.dp-wide .catrow{grid-template-columns:104px repeat(3,minmax(0,1fr))}
 @media (max-width:620px){.brand .tag{display:none}.stack{padding:16px 10px 60px}.btn .kbd{display:none}.dp-head{padding:9px 12px}.dp-body{padding:14px 12px 50px}}
 
 
+
+/* ===== ПЕЧАТЬ ДНЯ: чистый список с местом для заметок от руки ===== */
+#dayPrint{display:none}
+.dp-foot{flex-wrap:wrap}
+.dlines{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--tx-dim);white-space:nowrap}
+.dlines select{width:auto;padding:5px 7px;font-size:12px}
+.dp2{font-family:'Source Serif 4',Georgia,serif;color:#000;font-size:11.5pt;line-height:1.3}
+.dp2 header{display:flex;align-items:flex-end;justify-content:space-between;gap:8mm;padding-bottom:3mm;border-bottom:1.2pt solid #000;margin-bottom:3mm}
+.dp2 .dd{display:flex;align-items:flex-end;gap:4mm}
+.dp2 .dd b{font-size:40pt;font-weight:600;line-height:.85;letter-spacing:-.03em}
+.dp2 .dd strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:10pt;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
+.dp2 .dd span{display:block;font-size:11pt;margin-top:1mm}
+.dp2 .cnt{font-family:'IBM Plex Mono',monospace;font-size:8pt;letter-spacing:.1em;text-transform:uppercase;color:#444}
+.dp2 .lst{list-style:none;margin:0;padding:0}
+.dp2 .it{break-inside:avoid;page-break-inside:avoid;padding:3mm 0 0}
+.dp2 .l1{display:grid;grid-template-columns:5mm 12.5mm 23mm minmax(0,1fr);column-gap:3mm;align-items:baseline}
+.dp2 .bx{width:4.6mm;height:4.6mm;border:.7pt solid #000;border-radius:.6mm;align-self:center;position:relative}
+.dp2 .dn .bx::after{content:'';position:absolute;left:1.3mm;top:.2mm;width:1.3mm;height:2.5mm;border:solid #000;border-width:0 .9pt .9pt 0;transform:rotate(42deg)}
+.dp2 .tm{font-family:'IBM Plex Mono',monospace;font-size:10.5pt;font-weight:600}
+.dp2 .ty{font-family:'IBM Plex Mono',monospace;font-size:6.6pt;letter-spacing:.09em;text-transform:uppercase;border:.5pt solid #444;border-radius:5mm;padding:.5mm 0;text-align:center;color:#222;align-self:center}
+.dp2 .blank .ty{border-color:transparent}
+.dp2 .tx{font-size:12.5pt;font-weight:500;min-width:0;overflow-wrap:anywhere}
+.dp2 .tx em{font-style:italic;font-weight:400;color:#333}
+.dp2 .dn .tx{color:#555;text-decoration:line-through;text-decoration-thickness:.5pt}
+.dp2 .ph{white-space:nowrap}
+.dp2 .blank .tx{border-bottom:.45pt solid #7a7a7a;height:6mm}
+.dp2 .tc{margin:1.2mm 0 0 8mm;font-size:9pt;font-style:italic;color:#444}
+.dp2 .cl{display:block;height:7.6mm;margin-left:8mm;border-bottom:.45pt solid #7a7a7a}
+@media print{
+  body.pd>*{display:none!important}
+  body.pd>#dayPrint{display:block!important}
+  html,body.pd{background:#fff!important}
+}
+
 /* ===== РЕЖИМ «ЭКРАН»: лист растёт под встречи ===== */
 body.screenmode .po{display:none!important}
 body.screenmode #infoSize{display:none}
@@ -516,17 +550,42 @@ body.screenmode #infoSize{display:none}
 .sheet.scr .hol{font-size:5.4pt;max-height:none}
 .sheet.scr .calh span{font-size:6.6pt}
 .sheet.scr .blocks{margin-top:3mm}
+
+.sheet.scr .cell{container-type:inline-size}
+.sheet.scr .ph{white-space:nowrap;font-size:min(1em,calc((100cqw - 10px)/9.3))}
+@container (max-width:190px){
+  .sheet.scr .ev{flex-wrap:wrap;column-gap:.8mm;row-gap:0;margin-bottom:.9mm}
+  .sheet.scr .ev .evt{flex:1 0 100%}
+  .sheet.scr .ev .cb{display:none}
+}
+@container (max-width:60px){.sheet.scr .ph{white-space:normal;font-size:1em}}
+.sheet:not(.scr) .ph{white-space:normal}
+
+body.lm .sheet.scr .calh{display:none}
+body.lm .sheet.scr .calb{display:flex;flex-direction:column}
+body.lm .sheet.scr .week{display:contents}
+body.lm .sheet.scr .wkn,body.lm .sheet.scr .cell.out,body.lm .sheet.scr .cell.hid,body.lm .sheet.scr .add{display:none}
+body.lm .sheet.scr .cell{display:grid;grid-template-columns:12mm minmax(0,1fr);grid-template-rows:auto auto;column-gap:2mm;align-content:start;border-right:0;border-bottom:.35pt solid var(--rule);padding:1.8mm 1.4mm;min-height:11mm}
+body.lm .sheet.scr .ctop{grid-column:1;grid-row:1/span 2;flex-direction:column;align-items:flex-start;gap:.5mm}
+body.lm .sheet.scr .ctop::after{content:attr(data-wd);font-family:'IBM Plex Mono';font-size:5.8pt;letter-spacing:.12em;color:var(--mut)}
+body.lm .sheet.scr .cell.we .ctop::after{color:var(--we)}
+body.lm .sheet.scr .tdot{margin-left:0}
+body.lm .sheet.scr .hol{grid-column:2;grid-row:1;margin:0 0 .8mm}
+body.lm .sheet.scr .cbody{grid-column:2;grid-row:2;padding-top:0}
+body.lm .sheet.scr{--evfs:9pt!important;--dns:13pt!important}
+body.lm .sheet.scr .ev{margin-bottom:1.2mm}
+body:not(.screenmode) #layoutBtn{display:none}
 .sheet.nar .my{display:none}
 .sheet.nar .shead{gap:2mm}
 .sheet.nar .kick{font-size:5pt;letter-spacing:.12em}
 .sheet.nar .blocks{grid-template-columns:1fr}
-.sheet.nar .ev{flex-wrap:wrap;column-gap:.7mm;row-gap:0;margin-bottom:1mm;font-size:calc(var(--evfs)*.84);hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
-.sheet.nar .ev .cb{display:none}
-.sheet.nar .ev .tm{font-size:.84em}
-.sheet.nar .cell{padding:.8mm .5mm .6mm .8mm}
+body:not(.lm) .sheet.nar .ev{flex-wrap:wrap;column-gap:.7mm;row-gap:0;margin-bottom:1mm;font-size:calc(var(--evfs)*.84);hyphens:auto;-webkit-hyphens:auto;overflow-wrap:break-word}
+body:not(.lm) .sheet.nar .ev .cb{display:none}
+body:not(.lm) .sheet.nar .ev .tm{font-size:.84em}
+body:not(.lm) .sheet.nar .cell{padding:.8mm .5mm .6mm .8mm}
 .sheet.nar .ev .evt{flex:1 0 100%}
-.sheet.nar .calh span{letter-spacing:.04em;font-size:6pt}
-.sheet.nar .dnum{font-size:calc(var(--dns)*.95)}
+body:not(.lm) .sheet.nar .calh span{letter-spacing:.04em;font-size:6pt}
+body:not(.lm) .sheet.nar .dnum{font-size:calc(var(--dns)*.95)}
 .sheet.nar .sfoot{flex-direction:column;align-items:flex-start;gap:1mm}
 
 /* ===== ТЕЛЕФОН: шапка в несколько строк, без горизонтальной прокрутки, панели-шторки ===== */
@@ -716,6 +775,7 @@ body{max-width:100vw}
       <span class="pill" id="infoGrid">—</span>
       <span class="pill" id="infoSize">—</span>
       <span class="warnbadge po" id="warn">не влезает на лист <button id="fixBtn" type="button">подогнать</button></span>
+      <button class="btn" id="layoutBtn" type="button" style="padding:6px 10px;font-size:11px" title="Вид: сетка или список по дням">☰ Списком</button>
       <div class="zoomctl">
         <button class="iconbtn" id="fitBtn" type="button" title="Весь лист в окне">⤢</button>
         <button class="iconbtn" id="realBtn" type="button" title="Масштаб 100%">1:1</button>
@@ -821,7 +881,8 @@ body{max-width:100vw}
   </div>
   <div class="dp-foot no-print">
     <span class="hint">Встречи, созданные здесь, попадают в лист месяца.</span>
-    <button class="btn btn-primary" id="dPrint" type="button" style="padding:8px 12px;font-size:12px">Печать дня</button>
+    <label class="dlines" title="Сколько линий оставить под каждой задачей для комментариев от руки">Строк под задачей <select id="dLines" aria-label="Строк под задачей"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
+    <button class="btn btn-primary" id="dPrint" type="button" style="padding:8px 12px;font-size:12px" title="Список на день для печати (А4)">Печать дня</button>
   </div>
 </aside>
 
@@ -845,6 +906,7 @@ body{max-width:100vw}
     <p class="am-msg" id="amMsg" role="status" aria-live="polite"></p>
   </div>
 </div>
+<section id="dayPrint" aria-hidden="true"></section>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script>
@@ -860,6 +922,8 @@ const DAYS_IN=(y,m)=>new Date(y,m+1,0).getDate();
 const isoOf=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 const TODAY=new Date(); TODAY.setHours(0,0,0,0); const TODAY_ISO=isoOf(TODAY);
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+/* номер телефона (9–15 цифр с пробелами, скобками, дефисами) не должен рваться посередине */
+const phonify=h=>h.replace(/\+?\d[\d\s().\-]{7,}\d/g,m=>{const n=(m.match(/\d/g)||[]).length;return n>=9&&n<=15?`<span class="ph">${m}</span>`:m});
 function easter(y){const a=y%4,b=y%7,c=y%19,d=(19*c+15)%30,e=(2*a+4*b-d+34)%7,t=d+e+114;const dt=new Date(y,Math.floor(t/31)-1,(t%31)+1);dt.setDate(dt.getDate()+13);return dt;}
 function holidaysFor(y){const h={},put=(m,d,l)=>h[pad(m+1)+'-'+pad(d)]=l;
   for(let d=1;d<=8;d++)put(0,d,d===1?'Новый год':d===2?'Рождественские каникулы':'Новогодние каникулы');
@@ -1087,7 +1151,7 @@ function zoneHTML(){
   return '<div class="cn"></div>';
 }
 function evRowHTML(e){const K=KINDS[e.k]||KINDS.work;
-  return `<div class="ev${e.d?' done':''}"><span class="cb"></span>${e.time?`<span class="tm">${esc(e.time)}</span>`:''}<i class="mk" style="color:${state.ink==='mono'?'#1A1D22':K.c}">${K.g}</i><span class="evt">${esc(e.t)}${e.who?` <span class="wh">· ${esc(e.who)}</span>`:''}</span></div>`;}
+  return `<div class="ev${e.d?' done':''}"><span class="cb"></span>${e.time?`<span class="tm">${esc(e.time)}</span>`:''}<i class="mk" style="color:${state.ink==='mono'?'#1A1D22':K.c}">${K.g}</i><span class="evt">${phonify(esc(e.t))}${e.who?` <span class="wh">· ${phonify(esc(e.who))}</span>`:''}</span></div>`;}
 function cellHTML(c,y,m,hol){
   const d=c.date,iso=isoOf(d),wd=(d.getDay()+6)%7,we=wd>4,hl=state.holidays&&!c.out?hol[pad(m+1)+'-'+pad(d.getDate())]:null;
   const cls=['cell'];
@@ -1098,7 +1162,7 @@ function cellHTML(c,y,m,hol){
   const bg=(state.cellType==='grid'||state.cellType==='dots');
   const list=state.printEvents?(events[iso]||[]):[];
   return `<div class="${cls.join(' ')}" data-iso="${iso}" data-out="${c.out?1:0}"${ui.sel===iso?' tabindex="0"':''}>
-    <div class="ctop"><span class="dnum">${d.getDate()}</span>${!c.out&&state.markToday&&iso===TODAY_ISO?'<span class="tdot"></span>':''}</div>
+    <div class="ctop" data-wd="${WD[wd]}"><span class="dnum">${d.getDate()}</span>${!c.out&&state.markToday&&iso===TODAY_ISO?'<span class="tdot"></span>':''}</div>
     ${hl?`<p class="hol">${esc(hl)}</p>`:''}
     ${c.out?'':`<div class="cbody${bg?' bg':''}"><div class="evlist">${list.map(evRowHTML).join('')}</div>${zoneHTML()}</div><span class="add no-print">＋ встреча</span>`}
   </div>`;
@@ -1551,8 +1615,10 @@ let rafId=0,tId=0;
 function scheduleRender(){clearTimeout(tId);const heavy=monthsToRender().length*state.copies>2;
   if(heavy){tId=setTimeout(()=>{rafId=0;render()},180)}else if(!rafId)rafId=requestAnimationFrame(()=>{rafId=0;render()});}
 
+const isList=()=>isScreen()&&(uip.layout?uip.layout==='list':innerWidth<=700);
+function applyLayout(){document.body.classList.toggle('lm',isList());const b=$('#layoutBtn');if(b)b.textContent=isList()?'▦ Сеткой':'☰ Списком'}
 function applyMode(){
-  document.body.classList.toggle('screenmode',isScreen());
+  document.body.classList.toggle('screenmode',isScreen());applyLayout();
   $$('#modeSeg button').forEach(b=>{const on=b.dataset.mode===(isScreen()?'screen':'print');b.classList.toggle('on',on);b.setAttribute('aria-pressed',String(on))});
 }
 function setMode(m){
@@ -1657,6 +1723,7 @@ function bind(){
   $('#zoom').addEventListener('input',e=>{ui.fit=false;setZoom(+e.target.value/100)});
   $('#fitBtn').onclick=()=>{ui.fit=true;fitZoom()};
   $$('#modeSeg button').forEach(b=>b.onclick=()=>setMode(b.dataset.mode));
+  $('#layoutBtn').onclick=()=>{uip.layout=isList()?'grid':'list';saveU();applyLayout();requestAnimationFrame(syncFrames)};
   $('#realBtn').onclick=()=>{ui.fit=false;setZoom(1);toast('Масштаб 1:1 · ширина листа 210 мм минус поля')};
   $('#fixBtn').onclick=autofix;
   $('#printBtn').onclick=doPrint;$('#printBtn2').onclick=doPrint;
@@ -1666,7 +1733,9 @@ function bind(){
   $('#dNext').onclick=()=>dayNav(1);
   $('#dToday').onclick=()=>{ui.day=TODAY_ISO;uip.day=ui.day;saveU();setSel($(`.cell[data-iso="${TODAY_ISO}"]`)?TODAY_ISO:null);renderDayView()};
   $('#dPick').onchange=e=>{if(e.target.value){ui.day=e.target.value;uip.day=ui.day;saveU();renderDayView()}};
-  $('#dPrint').onclick=()=>{applyPageStyle();toast('Печатаем план дня · масштаб 100 %');setTimeout(()=>window.print(),120)};
+  $('#dPrint').onclick=printDay;
+  $('#dLines').value=String(uip.dpLines||2);
+  $('#dLines').onchange=e=>{uip.dpLines=+e.target.value;saveU()};
   $('#dTaskAdd').onclick=addTask;
   $('#dTaskText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addTask()}});
   $('#dTaskType').addEventListener('change',e=>{$('#dTaskAddBox').classList.toggle('show-meet',e.target.value==='meet')});
@@ -1742,16 +1811,47 @@ function fitZoom(){
 
 /* ---------- печать ---------- */
 function applyPageStyle(){const P=state.orient==='portrait';$('#pagestyle').textContent=`@page{size:A4 ${P?'portrait':'landscape'};margin:${state.margin}mm}`}
+
+/* ---------- печать дня: список с местом для комментариев ---------- */
+function dayPrintItems(iso){
+  const e=dayplan[iso]||{tasks:[]},items=[];
+  (events[iso]||[]).forEach(x=>items.push({time:x.time||'',type:'meet',txt:x.t||'',who:x.who||'',done:!!x.d,com:x.com||[]}));
+  (e.tasks||[]).forEach(t=>items.push({time:'',type:TTYPES[t.type]?t.type:'call',txt:t.txt||'',who:'',done:!!t.done,com:t.com||[]}));
+  const timed=items.filter(i=>i.time).sort((a,b)=>a.time.localeCompare(b.time));
+  return[...timed,...items.filter(i=>!i.time)];
+}
+function buildDayPrint(iso){
+  const[Y,M,D]=iso.split('-').map(Number),dt=new Date(Y,M-1,D),wd=(dt.getDay()+6)%7;
+  const items=dayPrintItems(iso),n=Math.max(1,Math.min(3,+uip.dpLines||2));
+  const lines='<i class="cl"></i>'.repeat(n);
+  const rows=items.length?items.map(it=>`<li class="it${it.done?' dn':''}"><div class="l1"><span class="bx"></span><span class="tm">${esc(it.time)}</span><span class="ty">${TTYPES[it.type].n}</span><span class="tx">${phonify(esc(it.txt))}${it.who?` <em>· ${phonify(esc(it.who))}</em>`:''}</span></div>${(it.com||[]).map(c=>`<div class="tc">↳ ${phonify(esc(c.txt))}</div>`).join('')}${lines}</li>`).join('')
+   :Array.from({length:8},()=>`<li class="it blank"><div class="l1"><span class="bx"></span><span class="tm"></span><span class="ty">&nbsp;</span><span class="tx"></span></div>${lines}</li>`).join('');
+  return `<div class="dp2"><header><div class="dd"><b>${D}</b><div><strong>${WDF[wd]}</strong><span>${MON[M-1].toLowerCase()} ${Y}</span></div></div><div class="cnt">${items.length?'задач: '+items.length:'свободный лист'}</div></header><ol class="lst">${rows}</ol></div>`;
+}
+function dayPageStyle(){$('#pagestyle').textContent='@page{size:A4 portrait;margin:14mm}'}
+function printDay(){
+  $('#dayPrint').innerHTML=buildDayPrint(ui.day);
+  document.body.classList.add('pd');dayPageStyle();
+  const mq=matchMedia('print');
+  const done=()=>{document.body.classList.remove('pd');$('#dayPrint').innerHTML='';
+    removeEventListener('afterprint',done);removeEventListener('pointerdown',done,true);
+    try{mq.removeEventListener('change',onMq)}catch(e){}};
+  const onMq=e=>{if(!e.matches)done()};
+  addEventListener('afterprint',done);
+  try{mq.addEventListener('change',onMq)}catch(e){}
+  setTimeout(()=>addEventListener('pointerdown',done,true),600);        // запасной выход, если браузер не прислал afterprint
+  setTimeout(()=>window.print(),150);
+}
 let printBack=false;
 function doPrint(){
+  if(uip.dpOpen){printDay();return}
   if(isScreen()){printBack=true;setMode('print');setTimeout(doPrint,350);return}
-  if(uip.dpOpen){applyPageStyle();toast('Печатаем план дня · масштаб 100 %');setTimeout(()=>window.print(),120);return}
   applyPageStyle();guardAll();
   if(checkOverflow())toast('Часть блоков не влезает на лист — нажмите «подогнать»');
   const pages=monthsToRender().length*state.copies;
   toast(`Печатаем ${pages} стр. А4 · поля ${state.margin} мм · масштаб 100 % · фон прозрачный`);
   setTimeout(()=>window.print(),140)}
-addEventListener('beforeprint',()=>{applyPageStyle();if(!uip.dpOpen)guardAll()});
+addEventListener('beforeprint',()=>{if(document.body.classList.contains('pd')){dayPageStyle();return}applyPageStyle();if(!uip.dpOpen)guardAll()});
 addEventListener('afterprint',()=>{toast('Готово.');if(printBack){printBack=false;setMode('screen')}});
 
 /* ---------- клавиши ---------- */
@@ -1785,6 +1885,7 @@ function deb(fn,ms){let t;return(...a)=>{clearTimeout(t);t=setTimeout(()=>fn(...
 let tt;function toast(msg){const el=$('#toast');el.textContent=msg;el.classList.add('on');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('on'),4200)}
 function relayoutScreen(){
   if(!isScreen())return;
+  const was=document.body.classList.contains('lm');applyLayout();if(was!==document.body.classList.contains('lm'))syncFrames();
   if(Math.abs(Math.round(stackW())-_lastW)<3){syncFrames();return}
   render();
 }
