@@ -141,6 +141,11 @@ input::placeholder{color:var(--tx-dim)}
 .dayview .salestable input:focus,.dayview .cinput:focus,.dayview .tedit:focus{outline:0;border-color:var(--marigold);box-shadow:0 0 0 2px rgba(231,168,44,.25)}
 .dayview .tedit{padding:5px 8px;font:inherit;font-family:'Source Serif 4',serif;font-size:13px}
 .tmain .tt{cursor:text}
+.msucc{border:1px solid rgba(120,200,140,.5);background:rgba(120,200,140,.12);color:#9fdcae;border-radius:99px;font-size:10px;padding:2px 8px;cursor:pointer;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
+.msucc.ok{cursor:default;background:none}
+.succbox{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line-soft);font-size:12px;color:var(--tx-mut)}
+.succbox .sdate{background:#FBFAF6;color:#14171C;border:1px solid #C7CAD1;border-radius:7px;padding:5px 8px;font:inherit;font-size:12px;width:auto}
+.succbox .btn{padding:6px 12px;font-size:12px}
 .tmain .tt:hover{text-decoration:underline dotted var(--tx-dim)}
 .sw{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:12.5px;color:var(--tx-mut);transition:color .2s}
 .sw:hover{color:var(--tx)}
@@ -437,6 +442,7 @@ body.dp-wide .catrow{grid-template-columns:104px repeat(3,minmax(0,1fr))}
 .trow:hover{border-color:var(--line)}
 .trow.done{opacity:.55}
 .tmain{display:grid;grid-template-columns:18px 66px minmax(0,1fr) auto auto;gap:8px;align-items:center}
+.tmain:has(.msucc){grid-template-columns:18px 66px minmax(0,1fr) auto auto auto}
 .tmain .cbx{width:16px;height:16px;border:1px solid var(--line);border-radius:5px;background:rgba(0,0,0,.25);cursor:pointer;display:grid;place-items:center;color:transparent;font-size:10px;transition:.16s}
 .tmain .cbx:hover{border-color:var(--marigold)}
 .trow.done .cbx{background:var(--marigold);border-color:var(--marigold);color:#17181C}
@@ -1508,6 +1514,17 @@ function comBlock(coms,open){
     <div class="comadd"><input class="cinput" placeholder="Комментарий к задаче…" maxlength="200"><button class="linkmini" type="button" data-cadd>＋</button></div>
   </div>`;
 }
+const fmtShort=iso=>{const m=/^(\d{4})-(\d\d)-(\d\d)$/.exec(iso||'');return m?`${m[3]}.${m[2]}`:''};
+function nextDayISO(iso){const [Y,M,D]=iso.split('-').map(Number),d=new Date(Y,M-1,D+1);return isoOf(d)}
+function makeMeetFromCall(t,date){
+  const copy=(t.com||[]).map(c=>({id:nid(),txt:c.txt,ts:c.ts||Date.now()}));
+  (events[date]=events[date]||[]).push({t:t.txt.slice(0,80),k:'work',d:false,time:'',who:'',com:copy});
+  t.meetOn=date;t.done=true;ui.succ=null;
+  saveE();saveD();
+  if($(`.cell[data-iso="${date}"]`))repaintCell(date);
+  buildTicker();
+  toast(`Встреча создана на ${fmtShort(date)} — с комментариями из звонка`);
+}
 function taskRow(t){
   const open=ui.open.has(t.id), coms=t.com||[], T=TTYPES[t.type]||TTYPES.call;
   return `<div class="trow${t.done?' done':''}" data-kind="task" data-id="${t.id}">
@@ -1515,9 +1532,11 @@ function taskRow(t){
       <button class="cbx" type="button" data-ttog aria-label="Готово">${t.done?'✓':''}</button>
       <span class="tbadge ${T.cls}">${T.n}</span>
       <span class="tt">${esc(t.txt)}</span>
+      ${t.type==='call'?(t.meetOn?`<span class="msucc ok" title="Встреча создана">→ ${esc(fmtShort(t.meetOn))}</span>`:`<button class="msucc" type="button" data-tsucc title="Звонок успешен — создать встречу">✓ успех</button>`):''}
       <button class="cbtn${coms.length?' has':''}" type="button" data-topen>💬 ${coms.length}</button>
       <button class="tdel" type="button" data-tdel title="Удалить задачу">×</button>
     </div>
+    ${ui.succ===t.id&&!t.meetOn?`<div class="succbox"><span>Встреча на</span><input type="date" class="sdate" value="${esc(nextDayISO(ui.day))}"><button class="btn btn-primary" type="button" data-tmk>Создать встречу</button><button class="linkmini" type="button" data-tcancel>отмена</button></div>`:''}
     ${comBlock(coms,open)}
   </div>`;
 }
@@ -1782,11 +1801,18 @@ function bind(){
       inp.addEventListener('blur',()=>done(true));
       return;
     }
-    const b=e.target.closest('[data-ttog],[data-tdel],[data-topen],[data-cadd],[data-cdel],[data-sdel]');
+    const b=e.target.closest('[data-ttog],[data-tdel],[data-topen],[data-cadd],[data-cdel],[data-sdel],[data-tsucc],[data-tmk],[data-tcancel]');
     if(!b)return;
     const row=b.closest('.trow')||{dataset:{}}, isMeet=row.dataset.kind==='meet';
     const ed=getDay(ui.day), arr=events[ui.day]||[];
-    if(b.hasAttribute('data-ttog')){
+    if(b.hasAttribute('data-tsucc')){ui.succ=row.dataset.id;}
+    else if(b.hasAttribute('data-tcancel')){ui.succ=null;}
+    else if(b.hasAttribute('data-tmk')){
+      const t=ed.tasks.find(x=>x.id===row.dataset.id),dv=row.querySelector('.sdate').value;
+      if(!t)return;if(!dv){toast('Выберите дату встречи');return}
+      makeMeetFromCall(t,dv);
+    }
+    else if(b.hasAttribute('data-ttog')){
       if(isMeet){const ev=arr[+row.dataset.evi];if(ev){ev.d=!ev.d;saveE();repaintCell(ui.day);}}
       else{const t=ed.tasks.find(x=>x.id===row.dataset.id);if(t)t.done=!t.done;saveD();}
     }else if(b.hasAttribute('data-tdel')){
