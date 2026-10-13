@@ -136,6 +136,12 @@ input[type=range]:disabled{opacity:.3;cursor:not-allowed}
 input[type=text],textarea,select{width:100%;background:rgba(0,0,0,.28);border:1px solid var(--line-soft);border-radius:8px;padding:9px 11px;font-size:12.5px;transition:.2s;color:var(--tx)}
 input[type=text]:focus,textarea:focus{outline:0;border-color:var(--marigold);background:rgba(0,0,0,.42)}
 input::placeholder{color:var(--tx-dim)}
+.dayview .salestable input,.dayview .cinput,.dayview .tedit{background:#FBFAF6!important;color:#14171C!important;border:1px solid #C7CAD1;border-radius:7px;width:100%;caret-color:#14171C}
+.dayview .salestable input::placeholder,.dayview .cinput::placeholder{color:#8A8F98!important}
+.dayview .salestable input:focus,.dayview .cinput:focus,.dayview .tedit:focus{outline:0;border-color:var(--marigold);box-shadow:0 0 0 2px rgba(231,168,44,.25)}
+.dayview .tedit{padding:5px 8px;font:inherit;font-family:'Source Serif 4',serif;font-size:13px}
+.tmain .tt{cursor:text}
+.tmain .tt:hover{text-decoration:underline dotted var(--tx-dim)}
 .sw{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:12.5px;color:var(--tx-mut);transition:color .2s}
 .sw:hover{color:var(--tx)}
 .sw input{position:absolute;opacity:0;pointer-events:none}
@@ -289,9 +295,9 @@ input::placeholder{color:var(--tx-dim)}
 .dayhead .mo{font-family:'IBM Plex Mono';font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--tx-dim);margin-left:auto}
 .cnt{font-family:'IBM Plex Mono';font-size:9px;color:var(--tx-dim);display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap}
 .cnt .bad{color:var(--red)}.cnt .ok{color:var(--sage)}
-.addgrid{display:grid;grid-template-columns:64px minmax(0,1fr) auto;gap:6px}
-.addgrid .f-who{grid-column:1/3}
-.addgrid .btn{grid-column:3;grid-row:1;align-self:stretch;padding:0 12px}
+.addgrid{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px}
+.addgrid .f-who{grid-column:1/2}
+.addgrid .btn{grid-column:2;grid-row:1;align-self:stretch;padding:0 12px}
 .kinds{display:flex;gap:5px;flex-wrap:wrap}
 .kinds label{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--tx-mut);cursor:pointer;border:1px solid var(--line-soft);border-radius:999px;padding:4px 9px;transition:.2s}
 .kinds input{position:absolute;opacity:0}
@@ -315,7 +321,7 @@ input::placeholder{color:var(--tx-dim)}
 .erow.hidden-ev .eb{opacity:.45}
 .erow .nb{font-family:'IBM Plex Mono';font-size:8px;letter-spacing:.08em;text-transform:uppercase;color:var(--red);display:block;margin-top:3px}
 .erow.edit{display:flex;flex-direction:column;gap:7px;background:var(--panel);border:1px solid var(--marigold)!important;padding:10px;box-shadow:0 8px 24px -14px rgba(0,0,0,.8)}
-.erow.edit .g1{display:grid;grid-template-columns:54px minmax(0,1fr) minmax(0,1fr);gap:6px}
+.erow.edit .g1{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6px}
 .erow.edit input{padding:7px 8px;font-size:12px}
 .erow.edit .acts{display:flex;gap:6px;align-items:center;margin-top:1px}
 .minibtn{border:1px solid var(--line);background:var(--panel2);border-radius:7px;padding:6px 11px;font-size:11.5px;font-weight:600;cursor:pointer;transition:.16s;display:inline-flex;gap:6px;align-items:center}
@@ -422,7 +428,7 @@ body.dp-wide .catrow{grid-template-columns:104px repeat(3,minmax(0,1fr))}
 .horo-note{margin:9px 0 0;font-size:9.5px;color:var(--tx-dim);font-style:italic}
 
 /* задачи */
-.taskadd{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:7px;margin-bottom:12px}
+.taskadd{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:7px;margin-bottom:12px}
 .taskadd .ta-type{width:auto}
 .taskadd .ta-time{display:none;width:62px}
 .taskadd.show-meet .ta-time{display:block}
@@ -512,9 +518,17 @@ body.dp-wide .catrow{grid-template-columns:104px repeat(3,minmax(0,1fr))}
 .dp2 .dd strong{display:block;font-family:'IBM Plex Mono',monospace;font-size:10pt;font-weight:600;letter-spacing:.16em;text-transform:uppercase}
 .dp2 .dd span{display:block;font-size:11pt;margin-top:1mm}
 .dp2 .cnt{font-family:'IBM Plex Mono',monospace;font-size:8pt;letter-spacing:.1em;text-transform:uppercase;color:#444}
+.dp2 .cats{width:100%;border-collapse:collapse;margin:0 0 4mm;break-inside:avoid;page-break-inside:avoid}
+.dp2 .cats th,.dp2 .cats td{border:.6pt solid #555;padding:1.2mm 2.4mm;height:6.6mm}
+.dp2 .cats thead th{font-family:'IBM Plex Mono',monospace;font-size:7pt;font-weight:500;letter-spacing:.12em;text-transform:uppercase;text-align:left;color:#222;background:#efefef;height:5.4mm}
+.dp2 .cats thead th:not(:first-child){text-align:right}
+.dp2 .cats tbody th{text-align:left;font-size:11.5pt;font-weight:600;width:34%;white-space:nowrap}
+.dp2 .cats tbody th i{font-style:normal;font-size:9pt;margin-right:1.5mm}
+.dp2 .cats td{text-align:right;font-family:'IBM Plex Mono',monospace;font-size:11.5pt;font-weight:600;width:22%;white-space:nowrap}
+.dp2 .sh{margin:0 0 1mm;font-family:'IBM Plex Mono',monospace;font-size:7pt;font-weight:500;letter-spacing:.16em;text-transform:uppercase;color:#444}
 .dp2 .lst{list-style:none;margin:0;padding:0}
 .dp2 .it{break-inside:avoid;page-break-inside:avoid;padding:3mm 0 0}
-.dp2 .l1{display:grid;grid-template-columns:5mm 12.5mm 23mm minmax(0,1fr);column-gap:3mm;align-items:baseline}
+.dp2 .l1{display:grid;grid-template-columns:5mm 23mm minmax(0,1fr);column-gap:3mm;align-items:baseline}
 .dp2 .bx{width:4.6mm;height:4.6mm;border:.7pt solid #000;border-radius:.6mm;align-self:center;position:relative}
 .dp2 .dn .bx::after{content:'';position:absolute;left:1.3mm;top:.2mm;width:1.3mm;height:2.5mm;border:solid #000;border-width:0 .9pt .9pt 0;transform:rotate(42deg)}
 .dp2 .tm{font-family:'IBM Plex Mono',monospace;font-size:10.5pt;font-weight:600}
@@ -795,11 +809,10 @@ body{max-width:100vw}
     <div class="tabpage on" data-page="day">
       <div>
         <div class="dayhead"><span class="d" id="nhDay">—</span><span class="w" id="nhWd">день не выбран</span><span class="mo" id="nhMo"></span></div>
-        <p class="hint" id="nhHint" style="margin:8px 0 0">Кликните по дню в листе. Встреча = время + дело + кто. Клик по готовой встрече в списке — править.</p>
+        <p class="hint" id="nhHint" style="margin:8px 0 0">Кликните по дню в листе. Встреча = дело + кто. Клик по готовой встрече в списке — править.</p>
       </div>
       <div class="row">
         <div class="addgrid">
-          <input type="text" id="evTime" class="f-time" inputmode="numeric" placeholder="10:00" maxlength="5" aria-label="Время">
           <input type="text" id="evText" placeholder="Созвон со студией" maxlength="80" aria-label="Дело">
           <button class="btn btn-primary" id="evAdd" type="button">＋</button>
           <input type="text" id="evWho" class="f-who" placeholder="Кто: СМС Реал, Хатка, врач…" maxlength="26" aria-label="Кто">
@@ -867,7 +880,6 @@ body{max-width:100vw}
             <option value="meet">Встреча</option>
             <option value="msg">Сообщение</option>
           </select>
-          <input type="text" id="dTaskTime" class="ta-time f-time" inputmode="numeric" maxlength="5" placeholder="10:00" aria-label="Время встречи">
           <button class="btn btn-primary" id="dTaskAdd" type="button">＋</button>
         </div>
         <div class="tasklist" id="dTasks"></div>
@@ -881,6 +893,7 @@ body{max-width:100vw}
   </div>
   <div class="dp-foot no-print">
     <span class="hint">Встречи, созданные здесь, попадают в лист месяца.</span>
+    <label class="dlines" title="Печатать таблицу сумм по направлениям (остаток, план дня, личный)"><input type="checkbox" id="dCatsPrint" aria-label="Суммы по направлениям"> Суммы по направлениям</label>
     <label class="dlines" title="Сколько линий оставить под каждой задачей для комментариев от руки">Строк под задачей <select id="dLines" aria-label="Строк под задачей"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
     <button class="btn btn-primary" id="dPrint" type="button" style="padding:8px 12px;font-size:12px" title="Список на день для печати (А4)">Печать дня</button>
   </div>
@@ -981,7 +994,7 @@ if(events===null){
   for(const[key,arr]of Object.entries(oldM)){const[yy,mm]=key.split('-');for(const x of(arr||[])){const iso=`${yy}-${mm}-${pad(x.day)}`;(events[iso]=events[iso]||[]).push({t:String(x.label||'').slice(0,80),k:x.kind||'fest',d:false,time:'',who:''});}}
   saveE();
 }
-function normEvents(){if(!events||typeof events!=='object'||Array.isArray(events))events={};for(const k in events) events[k]=(events[k]||[]).map(e=>({t:e.t||'',k:KINDS[e.k]?e.k:'work',d:!!e.d,time:e.time||'',who:e.who||'',com:e.com||[]}));}
+function normEvents(){if(!events||typeof events!=='object'||Array.isArray(events))events={};for(const k in events) events[k]=(events[k]||[]).map(e=>({t:e.t||'',k:KINDS[e.k]?e.k:'work',d:!!e.d,time:'',who:e.who||'',com:e.com||[]}));}
 normEvents();
 let uip=Object.assign({hl:false,hr:false,dpOpen:false,dpWide:false,day:TODAY_ISO},load(LS.u,{}));
 let ui={sel:null,zoom:.7,fit:true,tab:'day',evKind:'work',editIdx:null,day:uip.day||TODAY_ISO,open:new Set()};
@@ -1377,7 +1390,7 @@ function selectDay(iso,open){
   setSel(iso);
   if(iso){ui.day=iso;uip.day=iso;saveU();if(uip.dpOpen)renderDayView();}
   if(!iso){$('#nhHint').style.display='';$('#nhDay').textContent='—';$('#nhWd').textContent='день не выбран';$('#nhMo').textContent='';
-    $('#evTime').value='';$('#evText').value='';$('#evWho').value='';refreshDayPanel();return}
+    $('#evText').value='';$('#evWho').value='';refreshDayPanel();return}
   const[Y,M,D]=iso.split('-').map(Number),dt=new Date(Y,M-1,D);
   $('#nhHint').style.display='none';
   $('#nhDay').textContent=D;$('#nhWd').textContent=WDF[(dt.getDay()+6)%7];$('#nhMo').textContent=`${MON[M-1].toLowerCase()} ${Y}`;
@@ -1394,7 +1407,7 @@ function saveEdit(i){
   if(!t){toast('Название встречи не может быть пустым');row.querySelector('.f-text').focus();return}
   const e=events[ui.sel][i];
   e.t=t.slice(0,80);
-  e.time=normTime(row.querySelector('.f-time').value);
+  e.time='';
   e.who=row.querySelector('.f-who').value.trim().slice(0,26);
   const kd=row.querySelector('input[name="ek"]:checked');if(kd)e.k=kd.value;
   saveE();ui.editIdx=null;
@@ -1405,10 +1418,10 @@ function saveEdit(i){
 function addEvent(){
   if(!ui.sel){toast('Сначала выберите день в листе');return false}
   const t=$('#evText').value.trim();if(!t){toast('Напишите, что за встреча');$('#evText').focus();return false}
-  (events[ui.sel]=events[ui.sel]||[]).push({t:t.slice(0,80),k:ui.evKind,d:false,time:normTime($('#evTime').value),who:$('#evWho').value.trim().slice(0,26),com:[]});
+  (events[ui.sel]=events[ui.sel]||[]).push({t:t.slice(0,80),k:ui.evKind,d:false,time:'',who:$('#evWho').value.trim().slice(0,26),com:[]});
   saveE();ui.editIdx=null;
   repaintCell(ui.sel);
-  $('#evTime').value='';$('#evText').value='';$('#evWho').value='';$('#evText').focus();
+  $('#evText').value='';$('#evWho').value='';$('#evText').focus();
   buildTicker();renderDayTab();renderPrintTab();refreshDayPanel();
   if(uip.dpOpen)renderDayView();
   return true;
@@ -1439,7 +1452,6 @@ function renderDayTab(){
     if(i===ui.editIdx){
       return `<div class="erow edit" data-i="${i}">
         <div class="g1">
-          <input type="text" class="f-time" inputmode="numeric" maxlength="5" value="${esc(e.time)}" placeholder="10:00" aria-label="Время">
           <input type="text" class="f-text" maxlength="80" value="${esc(e.t)}" placeholder="Дело" aria-label="Дело">
           <input type="text" class="f-who" maxlength="26" value="${esc(e.who)}" placeholder="Кто" aria-label="Кто">
         </div>
@@ -1559,9 +1571,8 @@ function addTask(){
   if(type==='meet'){
     const [Y,M]=ui.day.split('-').map(Number);
     if(Y!==state.year||M-1!==state.month){state.year=Y;state.month=M-1;state.scope='month';syncInputs();render();}
-    (events[ui.day]=events[ui.day]||[]).push({t:txt.slice(0,80),k:'work',d:false,time:normTime($('#dTaskTime').value),who:'',com:[]});
+    (events[ui.day]=events[ui.day]||[]).push({t:txt.slice(0,80),k:'work',d:false,time:'',who:'',com:[]});
     saveE();repaintCell(ui.day);buildTicker();
-    $('#dTaskTime').value='';
   }else{
     getDay(ui.day).tasks.push({id:nid(),type,txt:txt.slice(0,120),done:false,com:[]});
   }
@@ -1695,9 +1706,7 @@ function bind(){
   $('#ticker').addEventListener('mouseout',e=>{const b=e.target.closest('.tk');if(!b)return;$$('.cell[data-iso="'+b.dataset.iso+'"]').forEach(c=>{if(!c.classList.contains('sel'))c.style.boxShadow=''})});
   $('#evKinds').addEventListener('change',e=>{ui.evKind=e.target.value});
   $('#evAdd').onclick=addEvent;
-  ['#evTime','#evText','#evWho'].forEach(s=>$(s).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addEvent()}}));
-  $('#evTime').addEventListener('input',e=>maskTime(e.target));
-  $('#evPanel').addEventListener('input',e=>{if(e.target.classList.contains('f-time'))maskTime(e.target)});
+  ['#evText','#evWho'].forEach(s=>$(s).addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addEvent()}}));
   $('#evPanel').addEventListener('keydown',e=>{
     const row=e.target.closest('.erow.edit');if(!row)return;
     if(e.key==='Enter'){e.preventDefault();saveEdit(+row.dataset.i)}
@@ -1735,11 +1744,11 @@ function bind(){
   $('#dPick').onchange=e=>{if(e.target.value){ui.day=e.target.value;uip.day=ui.day;saveU();renderDayView()}};
   $('#dPrint').onclick=printDay;
   $('#dLines').value=String(uip.dpLines||2);
+  $('#dCatsPrint').checked=uip.dpCats!==false;
+  $('#dCatsPrint').onchange=e=>{uip.dpCats=e.target.checked;saveU()};
   $('#dLines').onchange=e=>{uip.dpLines=+e.target.value;saveU()};
   $('#dTaskAdd').onclick=addTask;
   $('#dTaskText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addTask()}});
-  $('#dTaskType').addEventListener('change',e=>{$('#dTaskAddBox').classList.toggle('show-meet',e.target.value==='meet')});
-  $('#dTaskTime').addEventListener('input',e=>maskTime(e.target));
   $('#dSaleAdd').onclick=()=>{getDay(ui.day).sales.push({id:nid(),client:'',what:'',sum:''});saveD();renderDayView()};
 
   const DV=$('#dayView');
@@ -1757,9 +1766,25 @@ function bind(){
   DV.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('cinput')){e.preventDefault();
     const row=e.target.closest('.trow');addComment(row.dataset.kind==='meet'?'ev'+row.dataset.evi:row.dataset.id,e.target.value);}});
   DV.addEventListener('click',e=>{
+    const tt=e.target.closest('.tmain .tt');
+    if(tt&&!tt.querySelector('input')){
+      const row=tt.closest('.trow'),isM=row.dataset.kind==='meet';
+      const obj=isM?(events[ui.day]||[])[+row.dataset.evi]:getDay(ui.day).tasks.find(x=>x.id===row.dataset.id);
+      if(!obj)return;
+      const cur=isM?obj.t:obj.txt,inp=document.createElement('input');
+      inp.type='text';inp.className='tedit';inp.value=cur;inp.maxLength=isM?80:120;
+      tt.textContent='';tt.appendChild(inp);inp.focus();inp.select();
+      let fin=false;
+      const done=ok=>{if(fin)return;fin=true;const v=inp.value.trim();
+        if(ok&&v&&v!==cur){if(isM){obj.t=v.slice(0,80);saveE();repaintCell(ui.day);buildTicker()}else{obj.txt=v.slice(0,120);saveD()}}
+        renderDayView();};
+      inp.addEventListener('keydown',ev=>{if(ev.key==='Enter'){ev.preventDefault();done(true)}else if(ev.key==='Escape'){ev.preventDefault();done(false)}});
+      inp.addEventListener('blur',()=>done(true));
+      return;
+    }
     const b=e.target.closest('[data-ttog],[data-tdel],[data-topen],[data-cadd],[data-cdel],[data-sdel]');
     if(!b)return;
-    const row=b.closest('.trow'), isMeet=row.dataset.kind==='meet';
+    const row=b.closest('.trow')||{dataset:{}}, isMeet=row.dataset.kind==='meet';
     const ed=getDay(ui.day), arr=events[ui.day]||[];
     if(b.hasAttribute('data-ttog')){
       if(isMeet){const ev=arr[+row.dataset.evi];if(ev){ev.d=!ev.d;saveE();repaintCell(ui.day);}}
@@ -1820,13 +1845,18 @@ function dayPrintItems(iso){
   const timed=items.filter(i=>i.time).sort((a,b)=>a.time.localeCompare(b.time));
   return[...timed,...items.filter(i=>!i.time)];
 }
+function catsPrintHTML(iso){
+  const e=(dayplan[iso]&&dayplan[iso].d)||{};
+  const rows=DCATS.map(c=>{const o=e[c.k]||{};return `<tr><th><i style="color:${c.c}">●</i>${esc(c.n)}</th><td>${esc(o.rest||'')}</td><td>${esc(o.today||'')}</td><td>${esc(o.pers||'')}</td></tr>`}).join('');
+  return `<table class="cats"><thead><tr><th>Направление</th><th>Остаток</th><th>План дня</th><th>Личный</th></tr></thead><tbody>${rows}</tbody></table><h3 class="sh">Задачи</h3>`;
+}
 function buildDayPrint(iso){
   const[Y,M,D]=iso.split('-').map(Number),dt=new Date(Y,M-1,D),wd=(dt.getDay()+6)%7;
   const items=dayPrintItems(iso),n=Math.max(1,Math.min(3,+uip.dpLines||2));
   const lines='<i class="cl"></i>'.repeat(n);
-  const rows=items.length?items.map(it=>`<li class="it${it.done?' dn':''}"><div class="l1"><span class="bx"></span><span class="tm">${esc(it.time)}</span><span class="ty">${TTYPES[it.type].n}</span><span class="tx">${phonify(esc(it.txt))}${it.who?` <em>· ${phonify(esc(it.who))}</em>`:''}</span></div>${(it.com||[]).map(c=>`<div class="tc">↳ ${phonify(esc(c.txt))}</div>`).join('')}${lines}</li>`).join('')
-   :Array.from({length:8},()=>`<li class="it blank"><div class="l1"><span class="bx"></span><span class="tm"></span><span class="ty">&nbsp;</span><span class="tx"></span></div>${lines}</li>`).join('');
-  return `<div class="dp2"><header><div class="dd"><b>${D}</b><div><strong>${WDF[wd]}</strong><span>${MON[M-1].toLowerCase()} ${Y}</span></div></div><div class="cnt">${items.length?'задач: '+items.length:'свободный лист'}</div></header><ol class="lst">${rows}</ol></div>`;
+  const rows=items.length?items.map(it=>`<li class="it${it.done?' dn':''}"><div class="l1"><span class="bx"></span><span class="ty">${TTYPES[it.type].n}</span><span class="tx">${phonify(esc(it.txt))}${it.who?` <em>· ${phonify(esc(it.who))}</em>`:''}</span></div>${(it.com||[]).map(c=>`<div class="tc">↳ ${phonify(esc(c.txt))}</div>`).join('')}${lines}</li>`).join('')
+   :Array.from({length:8},()=>`<li class="it blank"><div class="l1"><span class="bx"></span><span class="ty">&nbsp;</span><span class="tx"></span></div>${lines}</li>`).join('');
+  return `<div class="dp2"><header><div class="dd"><b>${D}</b><div><strong>${WDF[wd]}</strong><span>${MON[M-1].toLowerCase()} ${Y}</span></div></div><div class="cnt">${items.length?'задач: '+items.length:'свободный лист'}</div></header>${uip.dpCats!==false?catsPrintHTML(iso):''}<ol class="lst">${rows}</ol></div>`;
 }
 function dayPageStyle(){$('#pagestyle').textContent='@page{size:A4 portrait;margin:14mm}'}
 function printDay(){
