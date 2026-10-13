@@ -1532,7 +1532,7 @@ function taskRow(t){
       <button class="cbx" type="button" data-ttog aria-label="Готово">${t.done?'✓':''}</button>
       <span class="tbadge ${T.cls}">${T.n}</span>
       <span class="tt">${esc(t.txt)}</span>
-      ${t.type==='call'?(t.meetOn?`<span class="msucc ok" title="Встреча создана">→ ${esc(fmtShort(t.meetOn))}</span>`:`<button class="msucc" type="button" data-tsucc title="Звонок успешен — создать встречу">✓ успех</button>`):''}
+      ${(t.type==='call'||t.type==='agree')?(t.meetOn?`<span class="msucc ok" title="Встреча создана">→ ${esc(fmtShort(t.meetOn))}</span>`:`<button class="msucc" type="button" data-tsucc title="Успешно — создать встречу">✓ успех</button>`):''}
       <button class="cbtn${coms.length?' has':''}" type="button" data-topen>💬 ${coms.length}</button>
       <button class="tdel" type="button" data-tdel title="Удалить задачу">×</button>
     </div>
