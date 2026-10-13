@@ -141,6 +141,9 @@ input::placeholder{color:var(--tx-dim)}
 .dayview .salestable input:focus,.dayview .cinput:focus,.dayview .tedit:focus{outline:0;border-color:var(--marigold);box-shadow:0 0 0 2px rgba(231,168,44,.25)}
 .dayview .tedit{padding:5px 8px;font:inherit;font-family:'Source Serif 4',serif;font-size:13px}
 .tmain .tt{cursor:text}
+.tmain .tbadge{cursor:pointer}
+.tmain .tbadge.ed{overflow:visible;position:relative;padding:0;border-color:transparent;background:none}
+.tbsel{position:absolute;left:0;top:-6px;z-index:8;width:150px;background:#FBFAF6;color:#14171C;border:1px solid var(--marigold);border-radius:7px;padding:5px 6px;font-size:12px;text-transform:none;letter-spacing:0}
 .msucc{border:1px solid rgba(120,200,140,.5);background:rgba(120,200,140,.12);color:#9fdcae;border-radius:99px;font-size:10px;padding:2px 8px;cursor:pointer;white-space:nowrap;font-family:'IBM Plex Mono',monospace}
 .msucc.ok{cursor:default;background:none}
 .succbox{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:8px;padding-top:8px;border-top:1px dashed var(--line-soft);font-size:12px;color:var(--tx-mut)}
@@ -986,9 +989,15 @@ function safeSet(k,v){try{localStorage.setItem(k,v);return true}
   catch(e){if(!_failShown){_failShown=true;try{toast('Браузер не даёт сохранить данные (приватный режим или переполнено)')}catch(_){}}return false}}
 var syncHook=null;
 const saveS=()=>{safeSet(LS.s,JSON.stringify(state));if(syncHook)syncHook()};
-const saveE=()=>{safeSet(LS.e,JSON.stringify(events));if(syncHook)syncHook()};
+const SIG=new Map();
+const sigOf=o=>{const c=Object.assign({},o);delete c.u;return JSON.stringify(c,Object.keys(c).sort())};
+function touchList(arr){const now=Date.now();for(const o of arr){if(!o||typeof o!=='object')continue;if(!o.id)o.id=nid();const sg=sigOf(o);if(SIG.get(o.id)!==sg){o.u=now;SIG.set(o.id,sg)}}}
+function registerSigs(){SIG.clear();
+  for(const k in events)for(const o of events[k])if(o&&o.id)SIG.set(o.id,sigOf(o));
+  for(const k in dayplan){const e=dayplan[k]||{};for(const o of[...(e.tasks||[]),...(e.sales||[])])if(o&&o.id)SIG.set(o.id,sigOf(o))}}
+const saveE=()=>{for(const k in events)touchList(events[k]);safeSet(LS.e,JSON.stringify(events));if(syncHook)syncHook()};
 const saveU=()=>safeSet(LS.u,JSON.stringify(uip));
-const saveD=()=>{safeSet(LS.d,JSON.stringify(dayplan));if(syncHook)syncHook()};
+const saveD=()=>{for(const k in dayplan){const e=dayplan[k]||{};touchList(e.tasks||[]);touchList(e.sales||[])}safeSet(LS.d,JSON.stringify(dayplan));if(syncHook)syncHook()};
 const saveDDeb=deb(saveD,400);
 let state=Object.assign({},DEF,load(LS.s,{}));
 if(typeof state.printNotes==='boolean'&&typeof state.printEvents!=='boolean'){state.printEvents=state.printNotes;delete state.printNotes;}
@@ -1000,7 +1009,9 @@ if(events===null){
   for(const[key,arr]of Object.entries(oldM)){const[yy,mm]=key.split('-');for(const x of(arr||[])){const iso=`${yy}-${mm}-${pad(x.day)}`;(events[iso]=events[iso]||[]).push({t:String(x.label||'').slice(0,80),k:x.kind||'fest',d:false,time:'',who:''});}}
   saveE();
 }
-function normEvents(){if(!events||typeof events!=='object'||Array.isArray(events))events={};for(const k in events) events[k]=(events[k]||[]).map(e=>({t:e.t||'',k:KINDS[e.k]?e.k:'work',d:!!e.d,time:'',who:e.who||'',com:e.com||[]}));}
+function normEvents(){if(!events||typeof events!=='object'||Array.isArray(events))events={};
+  for(const k in events){const cnt={};events[k]=(events[k]||[]).map(e=>{const kk=KINDS[e.k]?e.k:'work',sg=(e.t||'')+'|'+kk;cnt[sg]=(cnt[sg]||0)+1;
+    return{id:e.id||('e'+hashStr(k+'|'+sg+'|'+cnt[sg]).toString(36)),u:e.u||0,t:e.t||'',k:kk,d:!!e.d,time:'',who:e.who||'',com:e.com||[]}})}}
 normEvents();
 let uip=Object.assign({hl:false,hr:false,dpOpen:false,dpWide:false,day:TODAY_ISO},load(LS.u,{}));
 let ui={sel:null,zoom:.7,fit:true,tab:'day',evKind:'work',editIdx:null,day:uip.day||TODAY_ISO,open:new Set()};
@@ -1530,7 +1541,7 @@ function taskRow(t){
   return `<div class="trow${t.done?' done':''}" data-kind="task" data-id="${t.id}">
     <div class="tmain">
       <button class="cbx" type="button" data-ttog aria-label="Готово">${t.done?'✓':''}</button>
-      <span class="tbadge ${T.cls}">${T.n}</span>
+      <span class="tbadge ${T.cls}" title="Нажмите, чтобы сменить тип">${T.n}</span>
       <span class="tt">${esc(t.txt)}</span>
       ${(t.type==='call'||t.type==='agree')?(t.meetOn?`<span class="msucc ok" title="Встреча создана">→ ${esc(fmtShort(t.meetOn))}</span>`:`<button class="msucc" type="button" data-tsucc title="Успешно — создать встречу">✓ успех</button>`):''}
       <button class="cbtn${coms.length?' has':''}" type="button" data-topen>💬 ${coms.length}</button>
@@ -1545,7 +1556,7 @@ function meetRow(e,i){
   return `<div class="trow${e.d?' done':''}" data-kind="meet" data-evi="${i}">
     <div class="tmain">
       <button class="cbx" type="button" data-ttog aria-label="Готово">${e.d?'✓':''}</button>
-      <span class="tbadge tb-meet">Встреча</span>
+      <span class="tbadge tb-meet" title="Нажмите, чтобы сменить тип">Встреча · ${esc((KINDS[e.k]||KINDS.work).n)}</span>
       <span class="tt">${e.time?`<span class="ttm">${esc(e.time)}</span> `:''}${esc(e.t)}${e.who?` <span class="twh">· ${esc(e.who)}</span>`:''}</span>
       <button class="cbtn${coms.length?' has':''}" type="button" data-topen>💬 ${coms.length}</button>
       <button class="tdel" type="button" data-tdel title="Удалить встречу">×</button>
@@ -1785,6 +1796,23 @@ function bind(){
   DV.addEventListener('keydown',e=>{if(e.key==='Enter'&&e.target.classList.contains('cinput')){e.preventDefault();
     const row=e.target.closest('.trow');addComment(row.dataset.kind==='meet'?'ev'+row.dataset.evi:row.dataset.id,e.target.value);}});
   DV.addEventListener('click',e=>{
+    const tbd=e.target.closest('.tmain .tbadge');
+    if(tbd){
+      if(tbd.querySelector('select'))return;
+      const row=tbd.closest('.trow'),isM=row.dataset.kind==='meet';
+      const obj=isM?(events[ui.day]||[])[+row.dataset.evi]:getDay(ui.day).tasks.find(x=>x.id===row.dataset.id);
+      if(!obj)return;
+      const opts=isM?Object.entries(KINDS).map(([k,v])=>[k,'Встреча · '+v.n]):[['call','Звонок'],['agree','Договориться'],['msg','Сообщение']];
+      const cur=isM?obj.k:obj.type,sel=document.createElement('select');sel.className='tbsel';
+      sel.innerHTML=opts.map(([k,n])=>`<option value="${k}"${k===cur?' selected':''}>${n}</option>`).join('');
+      tbd.classList.add('ed');tbd.textContent='';tbd.appendChild(sel);sel.focus();
+      let fin=false;const end=()=>{if(fin)return;fin=true;renderDayView()};
+      sel.addEventListener('change',()=>{
+        if(isM){obj.k=sel.value;saveE();repaintCell(ui.day)}else{obj.type=sel.value;saveD()}
+        end()});
+      sel.addEventListener('blur',end);
+      return;
+    }
     const tt=e.target.closest('.tmain .tt');
     if(tt&&!tt.querySelector('input')){
       const row=tt.closest('.trow'),isM=row.dataset.kind==='meet';
@@ -1953,7 +1981,7 @@ addEventListener('resize',deb(()=>{measureTop();if(ui.fit)fitZoom();if(innerWidt
 
 (function init(){
   applyMode();if(isScreen())ui.zoom=screenZoom();
-  buildRuler();measureTop();applyUI();applyDp();bind();syncInputs();render();
+  registerSigs();buildRuler();measureTop();applyUI();applyDp();bind();syncInputs();render();
   if(uip.dpOpen)renderDayView();
   const iso=isoOf(TODAY);
   if(state.scope==='month'&&iso.split('-')[1]===pad(state.month+1)&&state.year===TODAY.getFullYear())selectDay(iso,false);
@@ -1976,7 +2004,7 @@ function applyExternal(){pendingSync=false;syncInputs();render();if(uip.dpOpen)r
 addEventListener('storage',e=>{
   if(!e.key)return;
   if(e.key===LS.s)state=Object.assign({},DEF,load(LS.s,{}));
-  else if(e.key===LS.e){events=load(LS.e,{});normEvents()}
+  else if(e.key===LS.e){events=load(LS.e,{});normEvents();registerSigs()}
   else if(e.key===LS.d){dayplan=load(LS.d,{});if(!dayplan||typeof dayplan!=='object'||Array.isArray(dayplan))dayplan={}}
   else return;
   if(/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'')){pendingSync=true;return}
@@ -2013,7 +2041,7 @@ function planCanon(p){
   return{d,tasks,sales};
 }
 function dayCanon(day){
-  const ev=(events[day]||[]).map(e=>({t:e.t,k:e.k,d:!!e.d,time:e.time||'',who:e.who||'',com:e.com||[]}));
+  const ev=(events[day]||[]).map(e=>({id:e.id,u:e.u||0,t:e.t,k:e.k,d:!!e.d,time:e.time||'',who:e.who||'',com:e.com||[]}));
   return{ev,p:planCanon(dayplan[day])};
 }
 const dayStr=c=>stable([c.ev,c.p]);
@@ -2045,18 +2073,27 @@ function openAuth(){$('#amScrim').classList.add('on');amMsg('');updateAuthModal(
 function closeAuth(){$('#amScrim').classList.remove('on')}
 
 /* ---------- слияние одного дня ---------- */
-function mergeDay(l,r){
-  const seen=new Set(r.ev.map(stable)),ev=[...r.ev];
-  for(const e of l.ev)if(!seen.has(stable(e)))ev.push(e);
+function merge3(base,loc,rem){
+  const B=new Map(base.map(x=>[x.id,x])),L=new Map(loc.map(x=>[x.id,x])),R=new Map(rem.map(x=>[x.id,x]));
+  const pick=id=>{const l=L.get(id),r=R.get(id),b=B.get(id);
+    if(l&&r){if(stable(l)===stable(r))return r;const lu=l.u||0,ru=r.u||0;if(lu!==ru)return lu>ru?l:r;return b&&stable(b)===stable(r)?l:r}
+    if(l||r)return b?null:(l||r);      // был в последней синхронизации, а теперь с одной стороны пропал — его удалили
+    return null};
+  const out=[],seen=new Set();
+  for(const x of rem){seen.add(x.id);const o=pick(x.id);if(o)out.push(o)}
+  for(const x of loc){if(seen.has(x.id))continue;const o=pick(x.id);if(o)out.push(o)}
+  return out}
+function mergeDay(l,r,b){
+  b=b||{ev:[],p:null};
+  const ev=merge3(b.ev||[],l.ev,r.ev);
   let p;
   if(!l.p)p=r.p;else if(!r.p)p=l.p;
   else{
-    const d={};
-    for(const c of DCATS){const lo=l.p.d[c.k]||{},ro=r.p.d[c.k]||{};
-      const o={rest:lo.rest||ro.rest||'',today:lo.today||ro.today||'',pers:lo.pers||ro.pers||''};
+    const bp=b.p||{d:{},tasks:[],sales:[]},d={};
+    for(const c of DCATS){const lo=l.p.d[c.k]||{},ro=r.p.d[c.k]||{},bo=bp.d&&bp.d[c.k]||{},o={};
+      for(const f of['rest','today','pers']){const lv=lo[f]||'',rv=ro[f]||'',bv=bo[f]||'';o[f]=lv!==bv?lv:rv}
       if(o.rest||o.today||o.pers)d[c.k]=o}
-    const byId=(a,b)=>{const m=new Map();for(const x of a)m.set(x.id||stable(x),x);for(const x of b)m.set(x.id||stable(x),x);return[...m.values()]};
-    p={d,tasks:byId(r.p.tasks,l.p.tasks),sales:byId(r.p.sales,l.p.sales)};
+    p={d,tasks:merge3(bp.tasks||[],l.p.tasks,r.p.tasks),sales:merge3(bp.sales||[],l.p.sales,r.p.sales)};
   }
   return{ev,p};
 }
@@ -2066,12 +2103,14 @@ function applyDay(day,c){
 }
 // true — если локальные данные дня изменились
 function reconcileDay(day,r){
-  const rc={ev:Array.isArray(r.events)?r.events:[],p:r.plan||null}, rs=dayStr(rc);
+  const rev=(Array.isArray(r.events)?r.events:[]).map((e,i)=>Object.assign({},e,{id:e.id||('e'+hashStr(day+'|'+(e.t||'')+'|'+(e.k||'work')+'|'+i).toString(36)),u:e.u||0}));
+  const rc={ev:rev,p:r.plan||null}, rs=dayStr(rc);
   const lc=dayCanon(day), ls=dayStr(lc), synced=syncMeta.days[day]??EMPTY;
   const base=()=>{if(rs===EMPTY)delete syncMeta.days[day];else syncMeta.days[day]=rs};
   if(ls===rs){base();return false}
   const localDirty=ls!==synced;             // здесь есть ещё не отправленные правки
-  applyDay(day,localDirty?mergeDay(lc,rc):rc);
+  let bs=null;try{const a=JSON.parse(synced);bs={ev:a[0]||[],p:a[1]}}catch(e){}
+  applyDay(day,localDirty?mergeDay(lc,rc,bs):rc);
   base();                                   // облачная версия — точка отсчёта; слияние отправится следующим пушем
   return true;
 }
@@ -2086,7 +2125,7 @@ function applyRemoteSettings(rs){
   return stable(state)!==before;
 }
 function refreshAfterSync(){
-  normEvents();persistLocal();saveMeta();
+  normEvents();registerSigs();persistLocal();saveMeta();
   if(/INPUT|TEXTAREA|SELECT/.test((document.activeElement||{}).tagName||'')){pendingSync=true;return}
   applyExternal();
 }
@@ -2226,6 +2265,8 @@ function initSync(){
     wipeLocal();closeAuth();toast('Вы вышли. Данные остались в облаке.');
   };
   addEventListener('online',()=>{if(sbUser)resync()});
+  setInterval(()=>{if(sbUser&&document.visibilityState==='visible'&&!syncBusy&&Date.now()-lastPull>20000)resync()},25000);
+  addEventListener('focus',()=>{if(sbUser&&!syncBusy&&Date.now()-lastPull>5000)resync()});
   addEventListener('offline',()=>{if(sbUser)setSyncUI('offline')});
   addEventListener('pagehide',()=>{if(sb&&sbUser){kaFlag=true;clearTimeout(syncTimer);pushNow()}});
   addEventListener('storage',e=>{if(e.key===SYNC_KEY)syncMeta=load(SYNC_KEY,syncMeta)});
