@@ -678,8 +678,35 @@ body{max-width:100vw}
   .cell{cursor:default}.add{display:none!important}.cell.sel{box-shadow:none!important}
   *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+/* ===== чистый вид: без служебных плашек в режиме «Экран» ===== */
+body.screenmode .stage-head .pill,body.screenmode .stage-head .zoomctl,body.screenmode .stage-head .warnbadge{display:none!important}
+/* ===== перенос ===== */
+.tmain{grid-template-columns:18px 66px minmax(0,1fr)!important;grid-auto-flow:column;grid-auto-columns:auto}
+.tmv{border:0;background:none;color:var(--tx-dim);cursor:pointer;font-size:13px;padding:0 3px;border-radius:5px}
+.tmv:hover{color:var(--marigold)}
+.movebar{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:120;background:#1B1F26;border:1px solid var(--marigold);color:var(--tx);border-radius:12px;padding:10px 14px;display:flex;gap:12px;align-items:center;font-size:13px;box-shadow:0 14px 40px rgba(0,0,0,.6)}
+body.moving .cell:not([data-out="1"]){cursor:crosshair}
+body.moving .cell:not([data-out="1"]):hover{outline:2px solid var(--marigold);outline-offset:-2px}
+body.moving .daypanel{transform:translateY(102%)!important}
+body.moving .dp-scrim{opacity:0!important;pointer-events:none!important}
+/* ===== телефон: план дня — нижняя шторка ===== */
+@media (max-width:700px){
+  .daypanel{top:auto;left:0;right:0;bottom:0;width:100%;height:88vh;height:88dvh;border-left:0;border-radius:18px 18px 0 0;transform:translateY(104%);box-shadow:0 -24px 60px rgba(0,0,0,.75)}
+  body.dp-open .daypanel{transform:none}
+  body.dp-wide .daypanel{top:var(--top);height:auto;left:0;width:100%;border-radius:0}
+  .dp-head{position:relative;padding-top:20px}
+  .dp-head::before{content:'';position:absolute;top:7px;left:50%;width:44px;height:4px;margin-left:-22px;border-radius:99px;background:rgba(255,255,255,.28)}
+}
+/* ===== печать дня: альбом и «на 1 лист» ===== */
+.dp2.land{display:grid;grid-template-columns:82mm minmax(0,1fr);column-gap:9mm;align-items:start}
+.dp2.land header{grid-column:1/-1}
+.dp2.land .side .cats{margin-bottom:0}
+.dp2 .main .sh{margin-top:0}
+.dp2.land .it{padding-top:2.4mm}
+.dp2.land .cats tbody th{white-space:normal;width:38%}
 </style>
-<style id="pagestyle">@page{size:A4 portrait;margin:12mm}</style>
+<style id="pagestyle">@page{size:A4 portrait;margin:12mm}
+</style>
 </head>
 <body>
 <div class="ambient no-print"><div class="lamp"></div><div class="rules"></div><div class="dots"></div><div class="grain"></div></div>
@@ -903,6 +930,8 @@ body{max-width:100vw}
   <div class="dp-foot no-print">
     <span class="hint">Встречи, созданные здесь, попадают в лист месяца.</span>
     <label class="dlines" title="Печатать таблицу сумм по направлениям (остаток, план дня, личный)"><input type="checkbox" id="dCatsPrint" aria-label="Суммы по направлениям"> Суммы по направлениям</label>
+    <label class="dlines" title="Ориентация листа для печати дня">Лист <select id="dOri" aria-label="Ориентация"><option value="portrait">книжный</option><option value="landscape">альбомный</option></select></label>
+    <label class="dlines" title="Сжать так, чтобы весь день поместился на одном листе"><input type="checkbox" id="dFit" aria-label="Уместить на 1 лист"> На 1 лист</label>
     <label class="dlines" title="Сколько линий оставить под каждой задачей для комментариев от руки">Строк под задачей <select id="dLines" aria-label="Строк под задачей"><option value="1">1</option><option value="2">2</option><option value="3">3</option></select></label>
     <button class="btn btn-primary" id="dPrint" type="button" style="padding:8px 12px;font-size:12px" title="Список на день для печати (А4)">Печать дня</button>
   </div>
@@ -1013,7 +1042,8 @@ function normEvents(){if(!events||typeof events!=='object'||Array.isArray(events
   for(const k in events){const cnt={};events[k]=(events[k]||[]).map(e=>{const kk=KINDS[e.k]?e.k:'work',sg=(e.t||'')+'|'+kk;cnt[sg]=(cnt[sg]||0)+1;
     return{id:e.id||('e'+hashStr(k+'|'+sg+'|'+cnt[sg]).toString(36)),u:e.u||0,t:e.t||'',k:kk,d:!!e.d,time:'',who:e.who||'',com:e.com||[]}})}}
 normEvents();
-let uip=Object.assign({hl:false,hr:false,dpOpen:false,dpWide:false,day:TODAY_ISO},load(LS.u,{}));
+let uip=Object.assign({hl:true,hr:true,dpOpen:false,dpWide:false,day:TODAY_ISO},load(LS.u,{}));
+if(!uip.v2){uip.hl=true;uip.hr=true;uip.v2=1;if(innerWidth>1150)uip.dpOpen=true;safeSet(LS.u,JSON.stringify(uip))}   /* чистый вид: боковые панели скрыты, справа — план дня */
 let ui={sel:null,zoom:.7,fit:true,tab:'day',evKind:'work',editIdx:null,day:uip.day||TODAY_ISO,open:new Set()};
 const hidden={};
 
@@ -1536,6 +1566,33 @@ function makeMeetFromCall(t,date){
   buildTicker();
   toast(`Встреча создана на ${fmtShort(date)} — с комментариями из звонка`);
 }
+function moveForm(key){
+  if(ui.mv!==key)return '';
+  return `<div class="succbox"><span>Перенести на</span><input type="date" class="sdate" value="${esc(nextDayISO(ui.day))}"><button class="btn btn-primary" type="button" data-tmv>Перенести</button><button class="linkmini" type="button" data-tpick>выбрать в календаре</button><button class="linkmini" type="button" data-tcancel>отмена</button></div>`;
+}
+function endMove(){ui.moving=null;document.body.classList.remove('moving');const b=$('#moveBar');if(b)b.remove()}
+function moveItem(mv,toIso){
+  const from=ui.day;
+  if(!toIso||toIso===from){toast('Выберите другой день');return false}
+  if(mv.kind==='meet'){
+    const arr=events[from]||[],ev=arr[mv.evi];if(!ev)return false;
+    arr.splice(mv.evi,1);if(!arr.length)delete events[from];
+    (events[toIso]=events[toIso]||[]).push(ev);saveE();
+    repaintCell(from);if($(`.cell[data-iso="${toIso}"]`))repaintCell(toIso);buildTicker();
+  }else{
+    const a=getDay(from).tasks,i=a.findIndex(x=>x.id===mv.id);if(i<0)return false;
+    const[t]=a.splice(i,1);getDay(toIso).tasks.push(t);saveD();
+  }
+  ui.mv=null;ui.open.clear();endMove();renderDayView();
+  toast(`Перенесено на ${fmtShort(toIso)}`);return true;
+}
+function startPick(mv){
+  ui.moving=mv;ui.mv=null;document.body.classList.add('moving');
+  const bar=document.createElement('div');bar.id='moveBar';bar.className='movebar no-print';
+  bar.innerHTML='<span>Нажмите день в календаре, куда перенести</span><button class="linkmini" type="button">отмена</button>';
+  bar.querySelector('button').onclick=()=>{endMove();renderDayView()};
+  document.body.appendChild(bar);
+}
 function taskRow(t){
   const open=ui.open.has(t.id), coms=t.com||[], T=TTYPES[t.type]||TTYPES.call;
   return `<div class="trow${t.done?' done':''}" data-kind="task" data-id="${t.id}">
@@ -1543,10 +1600,12 @@ function taskRow(t){
       <button class="cbx" type="button" data-ttog aria-label="Готово">${t.done?'✓':''}</button>
       <span class="tbadge ${T.cls}" title="Нажмите, чтобы сменить тип">${T.n}</span>
       <span class="tt">${esc(t.txt)}</span>
+      <button class="tmv" type="button" data-tmove title="Перенести на другой день">⇄</button>
       ${(t.type==='call'||t.type==='agree')?(t.meetOn?`<span class="msucc ok" title="Встреча создана">→ ${esc(fmtShort(t.meetOn))}</span>`:`<button class="msucc" type="button" data-tsucc title="Успешно — создать встречу">✓ успех</button>`):''}
       <button class="cbtn${coms.length?' has':''}" type="button" data-topen>💬 ${coms.length}</button>
       <button class="tdel" type="button" data-tdel title="Удалить задачу">×</button>
     </div>
+    ${moveForm(t.id)}
     ${ui.succ===t.id&&!t.meetOn?`<div class="succbox"><span>Встреча на</span><input type="date" class="sdate" value="${esc(nextDayISO(ui.day))}"><button class="btn btn-primary" type="button" data-tmk>Создать встречу</button><button class="linkmini" type="button" data-tcancel>отмена</button></div>`:''}
     ${comBlock(coms,open)}
   </div>`;
@@ -1558,9 +1617,11 @@ function meetRow(e,i){
       <button class="cbx" type="button" data-ttog aria-label="Готово">${e.d?'✓':''}</button>
       <span class="tbadge tb-meet" title="Нажмите, чтобы сменить тип">Встреча · ${esc((KINDS[e.k]||KINDS.work).n)}</span>
       <span class="tt">${e.time?`<span class="ttm">${esc(e.time)}</span> `:''}${esc(e.t)}${e.who?` <span class="twh">· ${esc(e.who)}</span>`:''}</span>
+      <button class="tmv" type="button" data-tmove title="Перенести на другой день">⇄</button>
       <button class="cbtn${coms.length?' has':''}" type="button" data-topen>💬 ${coms.length}</button>
       <button class="tdel" type="button" data-tdel title="Удалить встречу">×</button>
     </div>
+    ${moveForm('ev'+i)}
     ${comBlock(coms,open)}
   </div>`;
 }
@@ -1717,6 +1778,7 @@ function bind(){
   $('#dpScrim').onclick=closeDay;
   $('#dWide').onclick=toggleWide;
   $('#stack').addEventListener('click',e=>{const c=e.target.closest('.cell');if(!c||c.dataset.out==='1')return;
+    if(ui.moving){const mv=ui.moving;if(c.dataset.iso===ui.day){toast('Выберите другой день');return}moveItem(mv,c.dataset.iso);return}
     selectDay(c.dataset.iso,false);
     if(uip.dpOpen)renderDayView();              /* панель следует за выбором */
     if(innerWidth<=900)document.body.classList.add('rright');});
@@ -1740,7 +1802,8 @@ function bind(){
   $('#evPanel').addEventListener('keydown',e=>{
     const row=e.target.closest('.erow.edit');if(!row)return;
     if(e.key==='Enter'){e.preventDefault();saveEdit(+row.dataset.i)}
-    if(e.key==='Escape'){e.preventDefault();cancelEdit()}});
+    if(e.key==='Escape'&&ui.moving){endMove();renderDayView();return}
+  if(e.key==='Escape'){e.preventDefault();cancelEdit()}});
   $('#evPanel').addEventListener('click',e=>{
     const t=e.target.closest('[data-tog]');if(t){toggleEvent(+t.dataset.tog);return}
     const d=e.target.closest('[data-del]');if(d){delEvent(+d.dataset.del);return}
@@ -1776,6 +1839,10 @@ function bind(){
   $('#dLines').value=String(uip.dpLines||2);
   $('#dCatsPrint').checked=uip.dpCats!==false;
   $('#dCatsPrint').onchange=e=>{uip.dpCats=e.target.checked;saveU()};
+  $('#dOri').value=uip.dpOri==='landscape'?'landscape':'portrait';
+  $('#dFit').checked=!!uip.dpFit;
+  $('#dOri').onchange=e=>{uip.dpOri=e.target.value;saveU()};
+  $('#dFit').onchange=e=>{uip.dpFit=e.target.checked;saveU()};
   $('#dLines').onchange=e=>{uip.dpLines=+e.target.value;saveU()};
   $('#dTaskAdd').onclick=addTask;
   $('#dTaskText').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();addTask()}});
@@ -1829,12 +1896,16 @@ function bind(){
       inp.addEventListener('blur',()=>done(true));
       return;
     }
-    const b=e.target.closest('[data-ttog],[data-tdel],[data-topen],[data-cadd],[data-cdel],[data-sdel],[data-tsucc],[data-tmk],[data-tcancel]');
+    const b=e.target.closest('[data-ttog],[data-tdel],[data-topen],[data-cadd],[data-cdel],[data-sdel],[data-tsucc],[data-tmk],[data-tcancel],[data-tmove],[data-tmv],[data-tpick]');
     if(!b)return;
     const row=b.closest('.trow')||{dataset:{}}, isMeet=row.dataset.kind==='meet';
     const ed=getDay(ui.day), arr=events[ui.day]||[];
-    if(b.hasAttribute('data-tsucc')){ui.succ=row.dataset.id;}
-    else if(b.hasAttribute('data-tcancel')){ui.succ=null;}
+    const mkey=isMeet?'ev'+row.dataset.evi:row.dataset.id, mvo=isMeet?{kind:'meet',evi:+row.dataset.evi}:{kind:'task',id:row.dataset.id};
+    if(b.hasAttribute('data-tsucc')){ui.succ=row.dataset.id;ui.mv=null;}
+    else if(b.hasAttribute('data-tmove')){ui.mv=ui.mv===mkey?null:mkey;ui.succ=null;}
+    else if(b.hasAttribute('data-tmv')){const dv=row.querySelector('.sdate').value;if(!dv){toast('Выберите дату');return}if(moveItem(mvo,dv))return;}
+    else if(b.hasAttribute('data-tpick')){startPick(mvo);}
+    else if(b.hasAttribute('data-tcancel')){ui.succ=null;ui.mv=null;}
     else if(b.hasAttribute('data-tmk')){
       const t=ed.tasks.find(x=>x.id===row.dataset.id),dv=row.querySelector('.sdate').value;
       if(!t)return;if(!dv){toast('Выберите дату встречи');return}
@@ -1902,7 +1973,7 @@ function dayPrintItems(iso){
 function catsPrintHTML(iso){
   const e=(dayplan[iso]&&dayplan[iso].d)||{};
   const rows=DCATS.map(c=>{const o=e[c.k]||{};return `<tr><th><i style="color:${c.c}">●</i>${esc(c.n)}</th><td>${esc(o.rest||'')}</td><td>${esc(o.today||'')}</td><td>${esc(o.pers||'')}</td></tr>`}).join('');
-  return `<table class="cats"><thead><tr><th>Направление</th><th>Остаток</th><th>План дня</th><th>Личный</th></tr></thead><tbody>${rows}</tbody></table><h3 class="sh">Задачи</h3>`;
+  return `<table class="cats"><thead><tr><th>Направление</th><th>Остаток</th><th>План дня</th><th>Личный</th></tr></thead><tbody>${rows}</tbody></table>`;
 }
 function buildDayPrint(iso){
   const[Y,M,D]=iso.split('-').map(Number),dt=new Date(Y,M-1,D),wd=(dt.getDay()+6)%7;
@@ -1910,14 +1981,33 @@ function buildDayPrint(iso){
   const lines='<i class="cl"></i>'.repeat(n);
   const rows=items.length?items.map(it=>`<li class="it${it.done?' dn':''}"><div class="l1"><span class="bx"></span><span class="ty">${TTYPES[it.type].n}</span><span class="tx">${phonify(esc(it.txt))}${it.who?` <em>· ${phonify(esc(it.who))}</em>`:''}</span></div>${(it.com||[]).map(c=>`<div class="tc">↳ ${phonify(esc(c.txt))}</div>`).join('')}${lines}</li>`).join('')
    :Array.from({length:8},()=>`<li class="it blank"><div class="l1"><span class="bx"></span><span class="ty">&nbsp;</span><span class="tx"></span></div>${lines}</li>`).join('');
-  return `<div class="dp2"><header><div class="dd"><b>${D}</b><div><strong>${WDF[wd]}</strong><span>${MON[M-1].toLowerCase()} ${Y}</span></div></div><div class="cnt">${items.length?'задач: '+items.length:'свободный лист'}</div></header>${uip.dpCats!==false?catsPrintHTML(iso):''}<ol class="lst">${rows}</ol></div>`;
+  const land=uip.dpOri==='landscape',cats=uip.dpCats!==false?catsPrintHTML(iso):'';
+  return `<div class="dp2${land?' land':''}"><header><div class="dd"><b>${D}</b><div><strong>${WDF[wd]}</strong><span>${MON[M-1].toLowerCase()} ${Y}</span></div></div><div class="cnt">${items.length?'задач: '+items.length:'свободный лист'}</div></header>${cats?`<div class="side">${cats}</div>`:''}<div class="main"${cats?'':' style="grid-column:1/-1"'}><h3 class="sh">Задачи</h3><ol class="lst">${rows}</ol></div></div>`;
 }
-function dayPageStyle(){$('#pagestyle').textContent='@page{size:A4 portrait;margin:14mm}'}
+function dayPageStyle(){$('#pagestyle').textContent=`@page{size:A4 ${uip.dpOri==='landscape'?'landscape':'portrait'};margin:12mm}`}
+function fitDayPrint(){
+  const box=$('#dayPrint'),el=box.firstElementChild;if(!el)return;
+  const land=uip.dpOri==='landscape',W=(land?297:210)-24,H=(land?210:297)-24-1;
+  box.style.cssText=`display:block;position:absolute;left:-99999px;top:0;width:${W}mm;visibility:hidden`;
+  let s=1;
+  el.style.cssText='';
+  for(let k=0;k<4;k++){
+    const h=el.scrollHeight/MMPX;
+    if(k===0&&h<=H)break;
+    s=Math.max(.5,s*H/(h*(k?s:1)));
+    el.style.cssText=`transform:scale(${s});transform-origin:0 0;width:${W/s}mm`;
+    if(el.getBoundingClientRect().height/MMPX<=H)break;
+  }
+  const hh=el.getBoundingClientRect().height/MMPX;
+  box.style.cssText='';
+  if(s<1){box.style.height=Math.min(H,hh)+'mm';box.style.overflow='hidden'}
+}
 function printDay(){
   $('#dayPrint').innerHTML=buildDayPrint(ui.day);
+  if(uip.dpFit)fitDayPrint();
   document.body.classList.add('pd');dayPageStyle();
   const mq=matchMedia('print');
-  const done=()=>{document.body.classList.remove('pd');$('#dayPrint').innerHTML='';
+  const done=()=>{document.body.classList.remove('pd');$('#dayPrint').innerHTML='';$('#dayPrint').style.cssText='';
     removeEventListener('afterprint',done);removeEventListener('pointerdown',done,true);
     try{mq.removeEventListener('change',onMq)}catch(e){}};
   const onMq=e=>{if(!e.matches)done()};
